@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Grid
   - GameTiles
+  - GameBoard
   layers:
   - Default
   - TransparentFX

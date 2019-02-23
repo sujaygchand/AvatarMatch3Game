@@ -15,6 +15,7 @@ namespace Assets.Scripts.Helpers
         public static string Grid = "Grid";
         public static string GameTiles = "GameTiles";
         public static string BaseGameTile = "BaseGameTile";
+        public static string GameBoard = "GameBoard";
 
         public static string FindTileType(GameTile gameTile)
         {
@@ -34,5 +35,14 @@ namespace Assets.Scripts.Helpers
         Earth,
         Fire,
         Equalist
+    }
+
+    public enum SwipeDirection
+    {
+        NoSwipe,
+        UpSwipe,
+        RightSwipe,
+        DownSwipe,
+        LeftSwipe
     }
 }
