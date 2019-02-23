@@ -5,20 +5,27 @@ using Assets.Scripts.Helpers;
 
 public class GameBoard : MonoBehaviour
 {
+    [Header("Game Board variables")]
     public int width;
     public int height;
     public GameObject[,] allGameTiles;
+    public int NumOfTileTypes = 0;
 
     [SerializeField] GameObject s_GridTile;
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
-    private GridTitle [ , ] gameGrid;
-    
-    
+    private GridTitle[,] gameGrid;
+
+
 
     // Start is called before the first frame update
     void Start()
     {
+        if (NumOfTileTypes == 0 || NumOfTileTypes > Utilities.NumOfGameTileTypes())
+        {
+            NumOfTileTypes = Utilities.NumOfGameTileTypes();
+        }
+
         // If the artist hasn't set a board, render default
         if (!s_GridTile)
         {
@@ -50,9 +57,9 @@ public class GameBoard : MonoBehaviour
     {
         allGameTiles = new GameObject[width, height];
 
-        for( int i = 0; i < width; i++ )
+        for (int i = 0; i < width; i++)
         {
-            for(int j = 0; j < height; j++)
+            for (int j = 0; j < height; j++)
             {
                 // Background tiles
                 SpawnTile(s_GridTile, "GridTile", i, j, false);
@@ -74,10 +81,26 @@ public class GameBoard : MonoBehaviour
         // Offest spawn location by the gameboard location
         Vector2 tempCoord = new Vector2(gameObject.transform.position.x + x, gameObject.transform.position.y + y);
 
+        GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
+
+        if (returnObject)
+        {   
+            int maxLoops = 0;
+
+            while(CheckSetUpMatch(x, y, tileObject, tempTileType) && maxLoops < 25)
+            {
+                tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
+                
+                maxLoops++;
+            }
+
+        }
+
         GameObject tempTile = Instantiate(tileObject, tempCoord, Quaternion.identity, gameGridObject.transform);
 
         if (tempTile.GetComponent<GameTileBase>())
         {
+            tempTile.GetComponent<GameTileBase>().SetTileType(tempTileType);
             tempTile.GetComponent<GameTileBase>().currentCol = x;
             tempTile.GetComponent<GameTileBase>().currentRow = y;
         }
@@ -88,11 +111,76 @@ public class GameBoard : MonoBehaviour
         if (returnObject)
         {
             return tempTile;
-        } else
+        }
+        else
         {
             return null;
         }
 
+    }
+
+    private bool CheckSetUpMatch(int col, int row, GameObject tile, GameTileType tileType)
+    {
+        
+        // Quick method to check when the thrid col/row are tested
+        if (col > 1 && row > 1)
+        {
+            // Horizontal check
+            GameTileType leftTile1Type = allGameTiles[col - 1, row].GetComponent<GameTileBase>().GetGameTileType();
+            GameTileType leftTile2Type = allGameTiles[col - 2, row].GetComponent<GameTileBase>().GetGameTileType();
+
+            
+            if (tileType == leftTile1Type && tileType == leftTile2Type)
+            {
+                return true;
+            }
+
+            // Vertical Check
+            GameTileType BottomTile1Type = allGameTiles[col, row - 1].GetComponent<GameTileBase>().GetGameTileType();
+            GameTileType BottomTile2Type = allGameTiles[col, row - 2].GetComponent<GameTileBase>().GetGameTileType();
+
+            if (tileType == BottomTile1Type && tileType == BottomTile2Type)
+            {
+                return true;
+            }
+
+        }
+
+        // 
+        else if(col <= 1 || row <= 1)
+        {
+            if(row > 1)
+            {
+                if(allGameTiles[col, row - 1].GetComponent<GameTileBase>() && allGameTiles[col, row - 2].GetComponent<GameTileBase>())
+                {
+                    GameTileType LeftTile1Type = allGameTiles[col, row - 1].GetComponent<GameTileBase>().GetGameTileType();
+                    GameTileType LeftTile2Type = allGameTiles[col, row - 2].GetComponent<GameTileBase>().GetGameTileType();
+
+                    if (tileType == LeftTile1Type && tileType == LeftTile2Type)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if(col > 1)
+            {
+                if(allGameTiles[col - 1, row].GetComponent<GameTileBase>() && allGameTiles[col - 2, row].GetComponent<GameTileBase>())
+                {
+                    GameTileType BottomTile1Type = allGameTiles[col - 1, row].GetComponent<GameTileBase>().GetGameTileType();
+                    GameTileType BottomTile2Type = allGameTiles[col - 2, row].GetComponent<GameTileBase>().GetGameTileType();
+
+                    if (tileType == BottomTile1Type && tileType == BottomTile2Type)
+                    {
+                        return true;
+                    }
+                }
+         
+            }
+        }
+
+
+        return false;
 
     }
 

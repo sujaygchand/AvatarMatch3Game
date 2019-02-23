@@ -206,6 +206,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameBoard
       objectReference: {fileID: 0}
+    - target: {fileID: 340028930779305888, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
+        type: 3}
+      propertyPath: m_TagString
+      value: GameBoard
+      objectReference: {fileID: 0}
     - target: {fileID: 5694501000803842801, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -266,6 +271,16 @@ PrefabInstance:
       propertyPath: gameGridObject
       value: 
       objectReference: {fileID: 6698239819643749552}
+    - target: {fileID: 778112995106715275, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
+        type: 3}
+      propertyPath: width
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 778112995106715275, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
+        type: 3}
+      propertyPath: height
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9e6770ecbe62114eb9f89e1c0ae3fef, type: 3}
 --- !u!1 &6698239819643749552 stripped

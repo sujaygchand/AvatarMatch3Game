@@ -17,18 +17,18 @@ namespace Assets.Scripts.Helpers
         public static string BaseGameTile = "BaseGameTile";
         public static string GameBoard = "GameBoard";
 
-        public static string FindTileType(GameTile gameTile)
+        public static string FindTileType(GameTileType gameTile)
         {
             return string.Format("T_Avatar{0}Icon", gameTile);
         }
 
         public static int NumOfGameTileTypes()
         {
-            return Enum.GetNames(typeof(GameTile)).Length;
+            return Enum.GetNames(typeof(GameTileType)).Length;
         }
     }
 
-    public enum GameTile
+    public enum GameTileType
     {
         Air,
         Water,
