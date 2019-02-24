@@ -7,13 +7,11 @@ using Assets.Scripts.Helpers;
 [RequireComponent(typeof(SpriteRenderer))]
 public class GameTileBase : MonoBehaviour
 {
-
+    [Header("Position Variables")]
     public int currentCol;
     public int currentRow;
     private int previousCol;
     private int previousRow;
-    private float colOffset = 3.49f;
-    private float rowOffset = 7.04f;
 
     [SerializeField] private GameTileType tileType;
     [SerializeField] private AnimationCurve animationGraph;
@@ -57,8 +55,8 @@ public class GameTileBase : MonoBehaviour
          FindMatches();
 
 
-        targetPosition.x = currentCol - 3.49f;
-        targetPosition.y = currentRow - 7.04f;
+        targetPosition.x = currentCol + Utilities.ColumnOffset;
+        targetPosition.y = currentRow + Utilities.RowOffset;
 
         if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
         {
@@ -72,7 +70,11 @@ public class GameTileBase : MonoBehaviour
         else
         {
             transform.position = targetPosition;
-            gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+
+            if (gameBoard.allGameTiles[currentCol, currentRow])
+            {
+                gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+            }
         }
 
     }
@@ -183,7 +185,6 @@ public class GameTileBase : MonoBehaviour
                     otherTile.GetComponent<GameTileBase>().currentCol += 1;
                     currentCol -= 1;
                     CorountineTileTrigger();
-                    //otherTile.GetComponent<GameTileBase>().CorountineTileTrigger();
                 }
             }
         }
@@ -207,6 +208,7 @@ public class GameTileBase : MonoBehaviour
                     hasMatched = true;
                     LeftTile.GetComponent<GameTileBase>().hasMatched = true;
                     RightTile.GetComponent<GameTileBase>().hasMatched = true;
+                    
                 }
             }
         }

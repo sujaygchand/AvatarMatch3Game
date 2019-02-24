@@ -26,6 +26,9 @@ namespace Assets.Scripts.Helpers
         {
             return Enum.GetNames(typeof(GameTileType)).Length;
         }
+
+        public static float ColumnOffset = -3.49f;
+        public static float RowOffset = -7.04f;
     }
 
     public enum GameTileType
