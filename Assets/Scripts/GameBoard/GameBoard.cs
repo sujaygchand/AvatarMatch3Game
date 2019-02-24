@@ -15,7 +15,7 @@ public class GameBoard : MonoBehaviour
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
     private GridTitle[,] gameGrid;
-
+    private float destructionWaitTime = 0.5f;
 
 
     // Start is called before the first frame update
@@ -84,13 +84,13 @@ public class GameBoard : MonoBehaviour
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
         if (returnObject)
-        {   
+        {
             int maxLoops = 0;
 
-            while(CheckSetUpMatch(x, y, tileObject, tempTileType) && maxLoops < 25)
+            while (CheckSetUpMatch(x, y, tileObject, tempTileType) && maxLoops < 25)
             {
                 tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
-                
+
                 maxLoops++;
             }
 
@@ -121,7 +121,7 @@ public class GameBoard : MonoBehaviour
 
     private bool CheckSetUpMatch(int col, int row, GameObject tile, GameTileType tileType)
     {
-        
+
         // Quick method to check when the thrid col/row are tested
         if (col > 1 && row > 1)
         {
@@ -129,7 +129,7 @@ public class GameBoard : MonoBehaviour
             GameTileType leftTile1Type = allGameTiles[col - 1, row].GetComponent<GameTileBase>().GetGameTileType();
             GameTileType leftTile2Type = allGameTiles[col - 2, row].GetComponent<GameTileBase>().GetGameTileType();
 
-            
+
             if (tileType == leftTile1Type && tileType == leftTile2Type)
             {
                 return true;
@@ -147,11 +147,11 @@ public class GameBoard : MonoBehaviour
         }
 
         // 
-        else if(col <= 1 || row <= 1)
+        else if (col <= 1 || row <= 1)
         {
-            if(row > 1)
+            if (row > 1)
             {
-                if(allGameTiles[col, row - 1].GetComponent<GameTileBase>() && allGameTiles[col, row - 2].GetComponent<GameTileBase>())
+                if (allGameTiles[col, row - 1].GetComponent<GameTileBase>() && allGameTiles[col, row - 2].GetComponent<GameTileBase>())
                 {
                     GameTileType LeftTile1Type = allGameTiles[col, row - 1].GetComponent<GameTileBase>().GetGameTileType();
                     GameTileType LeftTile2Type = allGameTiles[col, row - 2].GetComponent<GameTileBase>().GetGameTileType();
@@ -163,9 +163,9 @@ public class GameBoard : MonoBehaviour
                 }
             }
 
-            if(col > 1)
+            if (col > 1)
             {
-                if(allGameTiles[col - 1, row].GetComponent<GameTileBase>() && allGameTiles[col - 2, row].GetComponent<GameTileBase>())
+                if (allGameTiles[col - 1, row].GetComponent<GameTileBase>() && allGameTiles[col - 2, row].GetComponent<GameTileBase>())
                 {
                     GameTileType BottomTile1Type = allGameTiles[col - 1, row].GetComponent<GameTileBase>().GetGameTileType();
                     GameTileType BottomTile2Type = allGameTiles[col - 2, row].GetComponent<GameTileBase>().GetGameTileType();
@@ -175,13 +175,72 @@ public class GameBoard : MonoBehaviour
                         return true;
                     }
                 }
-         
+
             }
         }
 
-
         return false;
+    }
 
+    public void DestroyMatches()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (allGameTiles[i, j])
+                {
+                    DestroyMatch(i, j);
+                }
+            }
+        }
+        
+        StartCoroutine(DropTiles_Cor());
+    }
+
+    private void DestroyMatch(int col, int row)
+    {
+        if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
+        {
+            allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect();
+
+            StartCoroutine(TileDesturctionEffect_Cor(col, row));
+        }
+    }
+
+    private IEnumerator TileDesturctionEffect_Cor(int col, int row)
+    {
+        allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect();
+        yield return new WaitForSeconds(destructionWaitTime);
+
+        Destroy(allGameTiles[col, row]);
+        allGameTiles[col, row] = null;
+
+        yield return new WaitForEndOfFrame();
+    } 
+
+    private IEnumerator DropTiles_Cor()
+    {
+        yield return new WaitForSeconds(destructionWaitTime);
+
+        for (int i = 0; i < width; i++)
+        {
+            int emptyslots = 0;
+
+            for (int j = 0; j < height; j++)
+            {
+                if (!allGameTiles[i, j])
+                {
+                    emptyslots++;
+                }
+                else if (emptyslots > 0)
+                {
+                    allGameTiles[i, j].GetComponent<GameTileBase>().currentRow -= emptyslots;
+                    allGameTiles[i, j] = null;
+                }
+            }
+        }
+        yield return new WaitForSeconds(0.25f);
     }
 
 }

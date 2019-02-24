@@ -12,6 +12,8 @@ public class GameTileBase : MonoBehaviour
     public int currentRow;
     private int previousCol;
     private int previousRow;
+    private float colOffset = 3.49f;
+    private float rowOffset = 7.04f;
 
     [SerializeField] private GameTileType tileType;
     [SerializeField] private AnimationCurve animationGraph;
@@ -23,9 +25,14 @@ public class GameTileBase : MonoBehaviour
     private Vector2 initialTouchPosition;
     private Vector2 finalTouchPosition;
     private Vector2 targetPosition;
+    private float swipeLerp = 0.6f;
+
+    [Header("Swipe Variables")]
     public float swipeAngle = 0;
     public float swipeThreshold = .9f;
+   
     [SerializeField] private bool hasMatched = false;
+    private bool canMatch = true;
 
     // Start is called before the first frame update
 
@@ -47,14 +54,7 @@ public class GameTileBase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (hasMatched)
-        {
-            tileImage.color = new Color(0f, 0f, 0f, .3f);
-        }
-        else
-        {
-            FindMatches();
-        }
+         FindMatches();
 
 
         targetPosition.x = currentCol - 3.49f;
@@ -62,7 +62,12 @@ public class GameTileBase : MonoBehaviour
 
         if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
         {
-            transform.position = Vector2.Lerp(transform.position, targetPosition, .3f);
+            transform.position = Vector2.Lerp(transform.position, targetPosition, swipeLerp);
+
+            if(gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
+            {
+                gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+            }
         }
         else
         {
@@ -82,6 +87,7 @@ public class GameTileBase : MonoBehaviour
     {
         finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         CalculateAngle();
+        //FindMatches();
     }
 
     private void CalculateAngle()
@@ -95,7 +101,7 @@ public class GameTileBase : MonoBehaviour
             MovePieces();
             //FindMatches();
 
-            print(swipeAngle);
+            //print(swipeAngle);
         }
 
     }
@@ -177,7 +183,7 @@ public class GameTileBase : MonoBehaviour
                     otherTile.GetComponent<GameTileBase>().currentCol += 1;
                     currentCol -= 1;
                     CorountineTileTrigger();
-                    otherTile.GetComponent<GameTileBase>().CorountineTileTrigger();
+                    //otherTile.GetComponent<GameTileBase>().CorountineTileTrigger();
                 }
             }
         }
@@ -226,6 +232,16 @@ public class GameTileBase : MonoBehaviour
 
     }
 
+    public void PlayMatchedEffect()
+    {
+      tileImage.color = new Color(0f, 0f, 0f, .3f);
+    }
+
+    public bool GetHasMatched()
+    {
+        return hasMatched;
+    }
+
     public GameTileType GetGameTileType()
     {
         return tileType;
@@ -234,20 +250,22 @@ public class GameTileBase : MonoBehaviour
     private IEnumerator CheckMoveMade_Cor()
     {
         yield return new WaitForSeconds(.5f);
-        print("Got here");
         if (otherTile)
         {
-            print("Other itle is: " + otherTile);
             if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
             {
-                print("Unmatch");
+                canMatch = false;
                 otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
                 otherTile.GetComponent<GameTileBase>().currentRow = currentRow;
                 currentCol = previousCol;
                 currentRow = previousRow;
+            } else
+            {
+                gameBoard.DestroyMatches();
             }
 
             otherTile = null;
+            canMatch = true;
         }
     }
 
