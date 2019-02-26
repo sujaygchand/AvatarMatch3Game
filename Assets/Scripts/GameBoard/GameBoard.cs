@@ -6,21 +6,26 @@ using Assets.Scripts.Helpers;
 public class GameBoard : MonoBehaviour
 {
     [Header("Game Board variables")]
+    public PlayerState currentPlayerState;
     public int width;
     public int height;
     public GameObject[,] allGameTiles;
     public int NumOfTileTypes = 0;
+    private MatchesManager matchesManager;
 
     [SerializeField] GameObject s_GridTile;
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
     private GridTitle[,] gameGrid;
-    private float destructionWaitTime = 0.5f;
+    private float destructionWaitTime = 0.2f;
+    private bool isRefiliing = false;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        currentPlayerState = PlayerState.Active;
+
         if (NumOfTileTypes == 0 || NumOfTileTypes > Utilities.NumOfGameTileTypes())
         {
             NumOfTileTypes = Utilities.NumOfGameTileTypes();
@@ -47,7 +52,12 @@ public class GameBoard : MonoBehaviour
             DrawBoard();
         }
 
+        //gameGridObject = this.gameObject;
+
         //gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
+
+        matchesManager = FindObjectOfType<MatchesManager>();
+
     }
 
     /*
@@ -121,9 +131,14 @@ public class GameBoard : MonoBehaviour
 
     private void RefillGameTileSpawn(int x, int y)
     {
+        if(allGameTiles[x, y])
+        {
+            return;
+        }
+
         Vector2 tempCoord = new Vector2(x, y);
         tempCoord.x += Utilities.ColumnOffset;
-        tempCoord.y += Utilities.RowOffset;
+        tempCoord.y += Utilities.RowOffset + 5;
 
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
@@ -206,6 +221,11 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
+    public float GetDestructionWaitTime()
+    {
+        return destructionWaitTime;
+    }
+
     public void DestroyMatches()
     {
         for (int i = 0; i < width; i++)
@@ -226,26 +246,26 @@ public class GameBoard : MonoBehaviour
     {
         if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
         {
-            allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect();
+            matchesManager.currentMatches.Remove(allGameTiles[col, row]);
+            allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect(destructionWaitTime);
+            
+            allGameTiles[col, row] = null;
 
-            StartCoroutine(TileDesturctionEffect_Cor(col, row));
         }
     }
 
-    private IEnumerator TileDesturctionEffect_Cor(int col, int row)
+    private IEnumerator DestructionEffect_Cor(float waitTime)
     {
-        allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect();
-        yield return new WaitForSeconds(destructionWaitTime);
 
-        Destroy(allGameTiles[col, row]);
-        allGameTiles[col, row] = null;
+        yield return new WaitForSeconds(waitTime);
 
-        yield return new WaitForEndOfFrame();
-    } 
+        Destroy(gameObject);
+
+    }
 
     private IEnumerator CollapseRow_Cor()
     {
-        yield return new WaitForSeconds(destructionWaitTime);
+        yield return new WaitForSeconds(destructionWaitTime + 0.15f);
 
         for (int i = 0; i < width; i++)
         {
@@ -253,7 +273,7 @@ public class GameBoard : MonoBehaviour
 
             for (int j = 0; j < height; j++)
             {
-                if (!allGameTiles[i, j])
+                if (allGameTiles[i, j] == null)
                 {
                     emptyslots++;
                 }
@@ -264,7 +284,10 @@ public class GameBoard : MonoBehaviour
                 }
             }
         }
-        yield return new WaitForSeconds(destructionWaitTime/2);
+        yield return new WaitForSeconds(destructionWaitTime);
+
+        isRefiliing = true;
+
         StartCoroutine(RefillBoard_cor());
     }
 
@@ -274,12 +297,14 @@ public class GameBoard : MonoBehaviour
         {
             for(int j = 0; j < height; j++)
             {
-                if (!allGameTiles[i, j])
+                if (allGameTiles[i, j] == null)
                 {
                     RefillGameTileSpawn(i, j);
                 }
             }
         }
+
+        isRefiliing = false;
     }
 
     private bool CheckForMatches()
@@ -298,18 +323,24 @@ public class GameBoard : MonoBehaviour
             }
         }
 
+        currentPlayerState = PlayerState.Active;
         return false;
     }
     
     private IEnumerator RefillBoard_cor()
     {
         RefillBorad();
-        yield return new WaitForSeconds(destructionWaitTime);
+        //yield return new WaitForSeconds(destructionWaitTime);
+
+        yield return new WaitUntil(() => isRefiliing == false);
 
         while (CheckForMatches())
         {
             yield return new WaitForSeconds(destructionWaitTime);
             DestroyMatches();
         }
+
+        yield return new WaitForSeconds(destructionWaitTime);
+        currentPlayerState = PlayerState.Active;
     }
 }

@@ -29,7 +29,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5524841806614542607}
-  - {fileID: 4830243000467723717}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -45,39 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c88fd44a02c0a04da82a72aaa3378fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  s_Width: 8
-  s_Height: 10
+  width: 0
+  height: 0
+  NumOfTileTypes: 0
   s_GridTile: {fileID: 0}
---- !u!1 &1161594647453846810
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4830243000467723717}
-  m_Layer: 0
-  m_Name: GameTiles
-  m_TagString: GameTiles
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4830243000467723717
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161594647453846810}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 5694501000803842801}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  s_GameTile: {fileID: 0}
+  gameGridObject: {fileID: 0}
 --- !u!1 &6698239819643749552
 GameObject:
   m_ObjectHideFlags: 0

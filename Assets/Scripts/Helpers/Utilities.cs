@@ -40,12 +40,18 @@ namespace Assets.Scripts.Helpers
         Equalist
     }
 
-    public enum SwipeDirection
+    public enum BoardDirection
     {
-        NoSwipe,
-        UpSwipe,
-        RightSwipe,
-        DownSwipe,
-        LeftSwipe
+        Current,
+        Up,
+        Right,
+        Down,
+        Left
+    }
+
+    public enum PlayerState
+    {
+        Wait,
+        Active
     }
 }
