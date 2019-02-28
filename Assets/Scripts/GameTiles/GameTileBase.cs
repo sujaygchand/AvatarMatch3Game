@@ -10,20 +10,27 @@ public class GameTileBase : MonoBehaviour
     [Header("Position Variables")]
     public int currentCol;
     public int currentRow;
-    private int previousCol;
-    private int previousRow;
+    protected int previousCol;
+    protected int previousRow;
 
-    [SerializeField] private GameTileType tileType;
-    [SerializeField] private AnimationCurve animationGraph;
+    [SerializeField] protected GameTileType gameTileType;
+    [SerializeField] protected TileType tileType = TileType.Normal;
+    [SerializeField] protected AnimationCurve animationGraph;
 
-    private SpriteRenderer tileImage;
-    private GameObject otherTile;
-    private GameBoard gameBoard;
-    private MatchesManager matchesManager;
+    [Header("Powerup Variables")]
+    [SerializeField] public bool isRowChar = false;
+    [SerializeField] public bool isColChar = false;
+    [SerializeField] private GameObject arrowMark;
 
-    private Vector2 initialTouchPosition;
-    private Vector2 finalTouchPosition;
-    private Vector2 targetPosition;
+    [SerializeField]  protected SpriteRenderer tileImage;
+    protected GameObject otherTile;
+    [SerializeField] protected GameBoard gameBoard;
+    public GameObject gameGridObject;
+    protected MatchesManager matchesManager;
+
+    protected Vector2 initialTouchPosition;
+    protected Vector2 finalTouchPosition;
+    protected Vector2 targetPosition;
     private float swipeLerp = 0.2f;
 
     [Header("Swipe Variables")]
@@ -31,7 +38,7 @@ public class GameTileBase : MonoBehaviour
     public float swipeThreshold = .9f;
 
     [SerializeField] private bool hasMatched = false;
-    private bool canMatch = true;
+    public bool additonalCheck = false;
 
     public GameObject matchedParent;
 
@@ -40,10 +47,12 @@ public class GameTileBase : MonoBehaviour
     private void Awake()
     {
         tileImage = GetComponent<SpriteRenderer>();
+        arrowMark.GetComponent<SpriteRenderer>().enabled = false;
     }
 
     void Start()
     {
+        tileType = TileType.Normal;
 
         targetPosition = new Vector2(currentCol, currentRow);
         gameBoard = GameObject.FindGameObjectWithTag(Utilities.GameBoard).GetComponent<GameBoard>();
@@ -71,8 +80,7 @@ public class GameTileBase : MonoBehaviour
             if (gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
             {
                 gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
-                //print(gameObject);
-                //matchesManager.CheckForMatches();
+                
             }
             matchesManager.CheckForMatches();
         }
@@ -87,10 +95,17 @@ public class GameTileBase : MonoBehaviour
             }
         }
 
+        if (additonalCheck && hasMatched)
+        {
+            additonalCheck = false;
+            matchesManager.CheckForMatches();
+        }
+
     }
 
-    private void OnMouseDown()
+    protected virtual void OnMouseDown()
     {
+        
         if (gameBoard.currentPlayerState == PlayerState.Active)
         {
             initialTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -98,7 +113,7 @@ public class GameTileBase : MonoBehaviour
         }
     }
 
-    private void OnMouseUp()
+    protected virtual void OnMouseUp()
     {
         if(gameBoard.currentPlayerState == PlayerState.Active)
         {
@@ -107,6 +122,29 @@ public class GameTileBase : MonoBehaviour
             //FindMatches();
         }
 
+    }
+
+    // Debug
+    private void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            isRowChar = true;
+            isColChar = false;
+
+
+
+            GenerateCharTiles(true);
+        }
+
+        if (Input.GetMouseButtonDown(2))
+        {
+            isRowChar = false;
+            isColChar = false;
+
+            GenerateCharTiles(false);
+
+        }
     }
 
     private void CalculateAngle()
@@ -119,11 +157,7 @@ public class GameTileBase : MonoBehaviour
             swipeAngle *= 180 / Mathf.PI;
             MovePieces();
             gameBoard.currentPlayerState = PlayerState.Wait;
-            //FindMatches();
-            //print(gameObject);
-
-
-            //print(swipeAngle);
+            gameBoard.currentTile = this;
         } else
         {
             gameBoard.currentPlayerState = PlayerState.Active;
@@ -131,27 +165,27 @@ public class GameTileBase : MonoBehaviour
 
     }
 
-    public Sprite LoadTileSprite(string tile)
+    public void GenerateCharTiles(bool isRowChar)
     {
+        this.isRowChar = isRowChar;
+        isColChar = !isRowChar;
 
-        Sprite tempSprite = Resources.Load<Sprite>("Tiles/" + tile);
+        arrowMark.GetComponent<SpriteRenderer>().enabled = true;
 
-        return tempSprite;
+        tileType = TileType.Char;
 
-        //(Sprite)AssetDatabase.LoadAssetAtPath("Assets/Art/Tiles" + tile, typeof(Sprite));
+        SetGameTileType(gameTileType);
+
+        if (!isRowChar)
+        {
+            arrowMark.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+        }
     }
 
-    public void SetTileType(GameTileType tileType)
-    {
-        this.tileType = tileType;
-
-        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType));
-
-        //print(LoadTileSprite(Utilities.FindTileType(tileType)));
-    }
 
     public void MovePieces()
     {
+        
         // Swipe Up
         if (swipeAngle < 135 && swipeAngle >= 45 && currentRow < gameBoard.height - 1)
         {
@@ -160,13 +194,16 @@ public class GameTileBase : MonoBehaviour
             {
                 otherTile = gameBoard.allGameTiles[currentCol, currentRow + 1];
 
+                print(otherTile);
+
                 if (otherTile.GetComponent<GameTileBase>())
                 {
-                    
+                    print(otherTile);
+
                     previousRow = currentRow;
                     previousCol = currentCol;
                     otherTile.GetComponent<GameTileBase>().currentRow -= 1;
-                    currentRow += 1;
+                    currentRow++;
                     CorountineTileTrigger();
                 }
             }
@@ -185,8 +222,8 @@ public class GameTileBase : MonoBehaviour
                   
                     previousRow = currentRow;
                     previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentCol -= 1;
-                    currentCol += 1;
+                    otherTile.GetComponent<GameTileBase>().currentCol--;
+                    currentCol++;
                     CorountineTileTrigger();
                 }
             }
@@ -205,8 +242,8 @@ public class GameTileBase : MonoBehaviour
                    
                     previousRow = currentRow;
                     previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentRow += 1;
-                    currentRow -= 1;
+                    otherTile.GetComponent<GameTileBase>().currentRow++;
+                    currentRow--;
                     CorountineTileTrigger();
                 }
             }
@@ -225,15 +262,200 @@ public class GameTileBase : MonoBehaviour
                     
                     previousRow = currentRow;
                     previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentCol += 1;
-                    currentCol -= 1;
+                    otherTile.GetComponent<GameTileBase>().currentCol++;
+                    currentCol--;
                     CorountineTileTrigger();
                 }
             }
         }
     }
 
-    public void FindMatchesWithSets()
+    public virtual void PlayMatchedEffect(float waitTime)
+    {
+
+        StartCoroutine(DestructionEffect_Cor(waitTime));
+    }
+
+    private IEnumerator DestructionEffect_Cor(float waitTime)
+    {
+        tileImage.color = new Color(0f, 0f, 0f, .3f);
+        yield return new WaitForSeconds(waitTime);
+
+        Destroy(gameObject);
+        
+    }
+
+    public Sprite LoadTileSprite(string tile)
+    {
+
+        Sprite tempSprite = Resources.Load<Sprite>("Tiles/" + tile);
+
+        return tempSprite;
+    }
+
+    public bool GetHasMatched()
+    {
+        return hasMatched;
+    }
+
+    public void SetHasMatched(bool hasMatched)
+    {
+        this.hasMatched = hasMatched;
+    }
+
+    public void SetGameTileType(GameTileType gameTileType)
+    {
+        this.gameTileType = gameTileType;
+
+        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
+    }
+
+
+    public GameTileType GetGameTileType()
+    {
+        return gameTileType;
+    }
+
+    public TileType GetTileType()
+    {
+        return tileType;
+    }
+    public void SetTileType(TileType tileType)
+    {
+        this.tileType = tileType;
+
+        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
+
+    }
+
+    private IEnumerator CheckMoveMade_Cor()
+    {
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - .15f);
+        if (otherTile)
+        {
+
+            if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
+            {
+                otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
+                otherTile.GetComponent<GameTileBase>().currentRow = currentRow;
+                currentCol = previousCol;
+                currentRow = previousRow;
+
+                yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+                gameBoard.currentPlayerState = PlayerState.Active;
+            }
+            else
+            {
+                gameBoard.DestroyMatches();
+                
+            }
+
+            otherTile = null;
+        }
+    }
+
+    public void CorountineTileTrigger()
+    {
+        StartCoroutine(CheckMoveMade_Cor());
+        //matchesManager.CheckForMatches();
+        /* gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+         print(this.gameObject);
+         StartCoroutine(LerpTile());
+         */
+    }
+
+    private IEnumerator LerpTile()
+    {
+        targetPosition.x = currentCol - 3.49f;
+        targetPosition.y = currentRow - 7.04f;
+
+        float animationTime = 0;
+
+        // The time you set on the animation graph
+        float animationEnd = animationGraph.keys[animationGraph.length - 1].time;
+
+        Vector3 currentPosition = gameObject.transform.position;
+
+        while (animationTime <= animationEnd)
+        {
+            float lerpFactor = animationGraph.Evaluate(animationTime);
+
+
+            gameObject.transform.position = Vector3.Lerp(currentPosition, targetPosition, lerpFactor);
+
+
+            animationTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+/*
+ 
+    
+    public void FindMatches()
+    {
+        // Horizontal matches
+        if (currentCol > 0 && currentCol < gameBoard.width - 1)
+        {
+            GameObject LeftTile = gameBoard.allGameTiles[currentCol - 1, currentRow];
+            GameObject RightTile = gameBoard.allGameTiles[currentCol + 1, currentRow];
+
+            // Nullptr check
+            if (LeftTile && RightTile)
+            {
+                if (tileType == LeftTile.GetComponent<GameTileBase>().GetGameTileType() &&
+                    tileType == RightTile.GetComponent<GameTileBase>().GetGameTileType())
+                {
+                    
+                        hasMatched = true;
+                        LeftTile.GetComponent<GameTileBase>().SetHasMatched(true);
+                        RightTile.GetComponent<GameTileBase>().SetHasMatched(true);
+
+                        LeftTile.GetComponent<GameTileBase>().matchedParent = gameObject;
+                        RightTile.GetComponent<GameTileBase>().matchedParent = gameObject;
+
+                    }
+                }
+            }
+
+        // Vertical matches
+        if (currentRow > 0 && currentRow < gameBoard.height - 1)
+        {
+            GameObject BottomTile = gameBoard.allGameTiles[currentCol, currentRow - 1];
+            GameObject TopTile = gameBoard.allGameTiles[currentCol, currentRow + 1];
+
+            // Nullptr check
+            if (BottomTile && TopTile)
+            {
+                if (tileType == BottomTile.GetComponent<GameTileBase>().GetGameTileType() &&
+                    tileType == TopTile.GetComponent<GameTileBase>().GetGameTileType())
+                {
+
+                        hasMatched = true;
+                        BottomTile.GetComponent<GameTileBase>().SetHasMatched(true);
+                        TopTile.GetComponent<GameTileBase>().SetHasMatched(true);
+
+                        BottomTile.GetComponent<GameTileBase>().matchedParent = gameObject;
+                        TopTile.GetComponent<GameTileBase>().matchedParent = gameObject;
+                    }
+            }
+        }
+
+    }
+
+
+
+        public void FindMatchesWithSets()
     {
         HashSet<GameObject> TempHorizontalSet = new HashSet<GameObject>();
         HashSet<GameObject> TempVerticalSet = new HashSet<GameObject>();
@@ -372,149 +594,5 @@ public class GameTileBase : MonoBehaviour
 
         print(tilesMatched);
     }
-
-
-    public void FindMatches()
-    {
-        // Horizontal matches
-        if (currentCol > 0 && currentCol < gameBoard.width - 1)
-        {
-            GameObject LeftTile = gameBoard.allGameTiles[currentCol - 1, currentRow];
-            GameObject RightTile = gameBoard.allGameTiles[currentCol + 1, currentRow];
-
-            // Nullptr check
-            if (LeftTile && RightTile)
-            {
-                if (tileType == LeftTile.GetComponent<GameTileBase>().GetGameTileType() &&
-                    tileType == RightTile.GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    
-                        hasMatched = true;
-                        LeftTile.GetComponent<GameTileBase>().SetHasMatched(true);
-                        RightTile.GetComponent<GameTileBase>().SetHasMatched(true);
-
-                        LeftTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                        RightTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-
-                    }
-                }
-            }
-
-        // Vertical matches
-        if (currentRow > 0 && currentRow < gameBoard.height - 1)
-        {
-            GameObject BottomTile = gameBoard.allGameTiles[currentCol, currentRow - 1];
-            GameObject TopTile = gameBoard.allGameTiles[currentCol, currentRow + 1];
-
-            // Nullptr check
-            if (BottomTile && TopTile)
-            {
-                if (tileType == BottomTile.GetComponent<GameTileBase>().GetGameTileType() &&
-                    tileType == TopTile.GetComponent<GameTileBase>().GetGameTileType())
-                {
-
-                        hasMatched = true;
-                        BottomTile.GetComponent<GameTileBase>().SetHasMatched(true);
-                        TopTile.GetComponent<GameTileBase>().SetHasMatched(true);
-
-                        BottomTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                        TopTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                    }
-            }
-        }
-
-    }
-
-    public void PlayMatchedEffect(float waitTime)
-    {
-
-        StartCoroutine(DestructionEffect_Cor(waitTime));
-    }
-
-    private IEnumerator DestructionEffect_Cor(float waitTime)
-    {
-        tileImage.color = new Color(0f, 0f, 0f, .3f);
-        yield return new WaitForSeconds(waitTime);
-
-        Destroy(gameObject);
-        
-    }
-
-    public bool GetHasMatched()
-    {
-        return hasMatched;
-    }
-
-    public void SetHasMatched(bool hasMatched)
-    {
-        this.hasMatched = hasMatched;
-    }
-
-    public GameTileType GetGameTileType()
-    {
-        return tileType;
-    }
-    
-
-    private IEnumerator CheckMoveMade_Cor()
-    {
-        yield return new WaitForSeconds(.3f);
-        if (otherTile)
-        {
-            canMatch = false;
-
-            if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
-            {
-                otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
-                otherTile.GetComponent<GameTileBase>().currentRow = currentRow;
-                currentCol = previousCol;
-                currentRow = previousRow;
-
-                yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
-                gameBoard.currentPlayerState = PlayerState.Active;
-            }
-            else
-            {
-                //gameBoard.DestroyMatches();
-                
-            }
-
-            otherTile = null;
-        }
-    }
-
-    public void CorountineTileTrigger()
-    {
-        StartCoroutine(CheckMoveMade_Cor());
-        //matchesManager.CheckForMatches();
-        /* gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
-         print(this.gameObject);
-         StartCoroutine(LerpTile());
-         */
-    }
-
-    private IEnumerator LerpTile()
-    {
-        targetPosition.x = currentCol - 3.49f;
-        targetPosition.y = currentRow - 7.04f;
-
-        float animationTime = 0;
-
-        // The time you set on the animation graph
-        float animationEnd = animationGraph.keys[animationGraph.length - 1].time;
-
-        Vector3 currentPosition = gameObject.transform.position;
-
-        while (animationTime <= animationEnd)
-        {
-            float lerpFactor = animationGraph.Evaluate(animationTime);
-
-
-            gameObject.transform.position = Vector3.Lerp(currentPosition, targetPosition, lerpFactor);
-
-
-            animationTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
-        }
-    }
-}
+     
+     */

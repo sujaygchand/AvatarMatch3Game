@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Helpers;
 
@@ -7,6 +8,7 @@ public class MatchesManager : MonoBehaviour
 {
     private GameBoard gameBoard;
     public List<GameObject> currentMatches = new List<GameObject>();
+    public bool isMatching = false;
 
     // Start is called before the first frame update
     void Start()
@@ -29,12 +31,10 @@ public class MatchesManager : MonoBehaviour
                 tempTile.GetComponent<GameTileBase>().SetHasMatched(true);
             }
         }
-
-        if (tile.Length > 0)
-        {
-            DestoryMatch();
-        }
+        
     }
+
+
 
     public void DestoryMatch()
     {
@@ -43,7 +43,7 @@ public class MatchesManager : MonoBehaviour
 
     private IEnumerator CheckForMatches_Cor()
     {
-        yield return new WaitForSeconds(.1f);
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - 0.25f);
 
 
         if (gameBoard)
@@ -59,44 +59,105 @@ public class MatchesManager : MonoBehaviour
                     {
                         GameTileType currentTileType = currentTile.GetComponent<GameTileBase>().GetGameTileType();
 
-                        if (i > 0 && i < gameBoard.width - 1)
+                        if (i >= 0 && i < gameBoard.width)
                         {
-                            GameObject rightTile = gameBoard.allGameTiles[i + 1, j];
-                            GameObject leftTile = gameBoard.allGameTiles[i - 1, j];
+                            GameObject rowTile1 = null;
+                            GameObject rowTile2 = null;
 
-                            if (rightTile && leftTile)
+                            if(i > 0 && i < gameBoard.width - 1)
+                            {
+                                rowTile1 = gameBoard.allGameTiles[i + 1, j];
+                                rowTile2 = gameBoard.allGameTiles[i - 1, j];
+                            }
+                            else if(i == 0)
+                            {
+                                rowTile1 = gameBoard.allGameTiles[i + 1, j];
+                                rowTile2 = gameBoard.allGameTiles[i + 2, j];
+                            }
+
+                            else if(i == gameBoard.width - 1)
+                            {
+                                rowTile1 = gameBoard.allGameTiles[i - 1, j];
+                                rowTile2 = gameBoard.allGameTiles[i - 2, j];
+                            }
+
+                            if (rowTile1 && rowTile2)
                             {
 
-                                GameTileType rightTileType = rightTile.GetComponent<GameTileBase>().GetGameTileType();
-                                GameTileType leftTileType = leftTile.GetComponent<GameTileBase>().GetGameTileType();
+                                GameTileType rowTile1Type = rowTile1.GetComponent<GameTileBase>().GetGameTileType();
+                                GameTileType rowTile2Type = rowTile2.GetComponent<GameTileBase>().GetGameTileType();
 
-                                if (currentTileType == rightTileType && currentTileType == leftTileType)
+                                if (currentTileType == rowTile1Type && currentTileType == rowTile2Type)
                                 {
-                                    GameObject[] tiles = { currentTile, rightTile, leftTile};
+
+                                    GameObject[] tiles = { currentTile, rowTile1, rowTile2};
+
+                                    foreach(GameObject tempTile in tiles)
+                                    {
+                                        if (tempTile.GetComponent<GameTileBase>().isRowChar)
+                                        {
+                                            currentMatches.Union(GetRowMatches(tempTile.GetComponent<GameTileBase>().currentRow));
+                                        }
+
+                                        if (tempTile.GetComponent<GameTileBase>().isColChar)
+                                        {
+                                            currentMatches.Union(GetColMatches(tempTile.GetComponent<GameTileBase>().currentCol));
+                                        }
+                                    }
 
                                     AddToList(tiles);
 
                                 }
-                            }
                         }
 
-                        if( j > 0 && j < gameBoard.height - 1)
+                        if( j >= 0 && j < gameBoard.height)
                         {
-                            GameObject upTile = gameBoard.allGameTiles[i, j + 1];
-                            GameObject downTile = gameBoard.allGameTiles[i, j - 1];
+                            GameObject colTile1 = null;
+                            GameObject colTile2 = null;
 
-                            if (upTile && downTile)
-                            {
-                                GameTileType upTileType = upTile.GetComponent<GameTileBase>().GetGameTileType();
-                                GameTileType downTileType = downTile.GetComponent<GameTileBase>().GetGameTileType();
-
-                                if (currentTileType == upTileType && currentTileType == downTileType)
+                                if (j > 0 && j < gameBoard.height - 1)
                                 {
-                                    GameObject[] tiles = { currentTile, upTile, downTile };
-
-                                    AddToList(tiles);
+                                    colTile1 = gameBoard.allGameTiles[i, j + 1];
+                                    colTile2 = gameBoard.allGameTiles[i, j - 1];
                                 }
-                            }
+
+                                else if (j == 0)
+                                {
+                                    colTile1 = gameBoard.allGameTiles[i, j + 1];
+                                    colTile2 = gameBoard.allGameTiles[i, j + 2];
+                                }
+                                else if (j == gameBoard.height - 1)
+                                {
+                                    colTile1 = gameBoard.allGameTiles[i, j - 1];
+                                    colTile2 = gameBoard.allGameTiles[i, j - 2];
+                                }
+
+                                if (colTile1 && colTile2)
+                                {
+                                    GameTileType colTile1Type = colTile1.GetComponent<GameTileBase>().GetGameTileType();
+                                    GameTileType colTile2Type = colTile2.GetComponent<GameTileBase>().GetGameTileType();
+
+                                    if (currentTileType == colTile1Type && currentTileType == colTile2Type)
+                                    {
+                                        GameObject[] tiles = { currentTile, colTile1, colTile2 };
+
+                                        foreach (GameObject tempTile in tiles)
+                                        {
+                                            if (tempTile.GetComponent<GameTileBase>().isRowChar)
+                                            {
+                                                currentMatches.Union(GetRowMatches(tempTile.GetComponent<GameTileBase>().currentRow));
+                                            }
+
+                                            if (tempTile.GetComponent<GameTileBase>().isColChar)
+                                            {
+                                                currentMatches.Union(GetColMatches(tempTile.GetComponent<GameTileBase>().currentCol));
+                                            }
+                                        }
+
+                                        AddToList(tiles);
+                                    }
+                                }
+                                }
                         }
                     }
                 }
@@ -104,4 +165,44 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
+    public void MakeSpecialTile()
+    {
+        
+    }
+
+    public void MakeCharTile()
+    {
+
+    }
+
+
+    private List<GameObject> GetColMatches(int col)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for(int i = 0; i < gameBoard.height; i++)
+        {
+            if (gameBoard.allGameTiles[col, i] != null)
+            {
+                tiles.Add(gameBoard.allGameTiles[col, i]);
+                gameBoard.allGameTiles[col, i].GetComponent<GameTileBase>().SetHasMatched(true);
+            }
+        }
+        return tiles;
+    }
+
+    private List<GameObject> GetRowMatches(int row)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for (int i = 0; i < gameBoard.width; i++)
+        {
+            if (gameBoard.allGameTiles[i, row] != null)
+            {
+                tiles.Add(gameBoard.allGameTiles[i, row]);
+                gameBoard.allGameTiles[i, row].GetComponent<GameTileBase>().SetHasMatched(true);
+            }
+        }
+        return tiles;
+    }
 }

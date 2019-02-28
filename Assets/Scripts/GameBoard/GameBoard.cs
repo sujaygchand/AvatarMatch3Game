@@ -10,6 +10,7 @@ public class GameBoard : MonoBehaviour
     public int width;
     public int height;
     public GameObject[,] allGameTiles;
+    public GameTileBase currentTile;
     public int NumOfTileTypes = 0;
     private MatchesManager matchesManager;
 
@@ -17,8 +18,9 @@ public class GameBoard : MonoBehaviour
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
     private GridTitle[,] gameGrid;
-    private float destructionWaitTime = 0.2f;
+    private float destructionWaitTime = 0.55f;
     private bool isRefiliing = false;
+    private bool ischecking = true;
 
 
     // Start is called before the first frame update
@@ -110,9 +112,10 @@ public class GameBoard : MonoBehaviour
 
         if (tempTile.GetComponent<GameTileBase>())
         {
-            tempTile.GetComponent<GameTileBase>().SetTileType(tempTileType);
+            tempTile.GetComponent<GameTileBase>().SetGameTileType(tempTileType);
             tempTile.GetComponent<GameTileBase>().currentCol = x;
             tempTile.GetComponent<GameTileBase>().currentRow = y;
+            tempTile.GetComponent<GameTileBase>().gameGridObject = gameGridObject;
         }
 
         // For organisational and debugging purposes
@@ -146,7 +149,7 @@ public class GameBoard : MonoBehaviour
 
         if (tempTile.GetComponent<GameTileBase>())
         {
-            tempTile.GetComponent<GameTileBase>().SetTileType(tempTileType);
+            tempTile.GetComponent<GameTileBase>().SetGameTileType(tempTileType);
             tempTile.GetComponent<GameTileBase>().currentCol = x;
             tempTile.GetComponent<GameTileBase>().currentRow = y;
         }
@@ -250,8 +253,8 @@ public class GameBoard : MonoBehaviour
             allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect(destructionWaitTime);
             
             allGameTiles[col, row] = null;
-
         }
+
     }
 
     private IEnumerator DestructionEffect_Cor(float waitTime)
@@ -265,7 +268,7 @@ public class GameBoard : MonoBehaviour
 
     private IEnumerator CollapseRow_Cor()
     {
-        yield return new WaitForSeconds(destructionWaitTime + 0.15f);
+        yield return new WaitForSeconds(destructionWaitTime);
 
         for (int i = 0; i < width; i++)
         {
@@ -309,6 +312,7 @@ public class GameBoard : MonoBehaviour
 
     private bool CheckForMatches()
     {
+
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
@@ -323,16 +327,45 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        currentPlayerState = PlayerState.Active;
         return false;
     }
+
+    private bool CheckForEmptySlots()
+    {
+        foreach(GameObject tile in allGameTiles)
+        {
+            if (!tile)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void AdditionalMatchCheck()
+    {
+        if (ischecking)
+        {
+            ischecking = false;
+            currentPlayerState = PlayerState.Wait;
+
+            foreach (GameObject tile in allGameTiles)
+            {
+                if (tile.GetComponent<GameTileBase>().GetHasMatched())
+                {
+                    tile.GetComponent<GameTileBase>().additonalCheck = true;
+                }
+            }
+        }
+    }
+
     
     private IEnumerator RefillBoard_cor()
     {
         RefillBorad();
-        //yield return new WaitForSeconds(destructionWaitTime);
 
-        yield return new WaitUntil(() => isRefiliing == false);
+        yield return new WaitUntil(() => CheckForEmptySlots() == false);
+        //yield return new WaitForSeconds(destructionWaitTime);
 
         while (CheckForMatches())
         {
@@ -341,6 +374,12 @@ public class GameBoard : MonoBehaviour
         }
 
         yield return new WaitForSeconds(destructionWaitTime);
+
+        while (CheckForEmptySlots())
+        {
+            AdditionalMatchCheck();
+        }
+
         currentPlayerState = PlayerState.Active;
     }
 }

@@ -15,11 +15,13 @@ namespace Assets.Scripts.Helpers
         public static string Grid = "Grid";
         public static string GameTiles = "GameTiles";
         public static string BaseGameTile = "BaseGameTile";
+        public static string CharGameTile = "CharGameTile";
         public static string GameBoard = "GameBoard";
+        
 
-        public static string FindTileType(GameTileType gameTile)
+        public static string FindTileType(TileType tileType, GameTileType gameTile)
         {
-            return string.Format("T_Avatar{0}Icon", gameTile);
+            return string.Format("{0}/T_Avatar{1}Icon{0}", tileType, gameTile);
         }
 
         public static int NumOfGameTileTypes()
@@ -27,8 +29,8 @@ namespace Assets.Scripts.Helpers
             return Enum.GetNames(typeof(GameTileType)).Length;
         }
 
-        public static float ColumnOffset = -3.49f;
-        public static float RowOffset = -7.04f;
+        public static float ColumnOffset = 0; //-3.49f;
+        public static float RowOffset = 0; //-7.04f;
     }
 
     public enum GameTileType
@@ -38,6 +40,13 @@ namespace Assets.Scripts.Helpers
         Earth,
         Fire,
         Equalist
+    }
+
+    public enum TileType
+    {
+        Normal,
+        Char,
+        Weapon
     }
 
     public enum BoardDirection
