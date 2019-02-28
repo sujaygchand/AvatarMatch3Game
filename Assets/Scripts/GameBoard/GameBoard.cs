@@ -171,7 +171,6 @@ public class GameBoard : MonoBehaviour
             GameTileType leftTile1Type = allGameTiles[col - 1, row].GetComponent<GameTileBase>().GetGameTileType();
             GameTileType leftTile2Type = allGameTiles[col - 2, row].GetComponent<GameTileBase>().GetGameTileType();
 
-
             if (tileType == leftTile1Type && tileType == leftTile2Type)
             {
                 return true;

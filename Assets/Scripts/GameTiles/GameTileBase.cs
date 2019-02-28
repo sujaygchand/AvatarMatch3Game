@@ -20,6 +20,7 @@ public class GameTileBase : MonoBehaviour
     [Header("Powerup Variables")]
     [SerializeField] public bool isRowChar = false;
     [SerializeField] public bool isColChar = false;
+    [SerializeField] public bool isAvatarTile = false;
     [SerializeField] private GameObject arrowMark;
 
     [SerializeField]  protected SpriteRenderer tileImage;
@@ -131,21 +132,7 @@ public class GameTileBase : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            isRowChar = true;
-            isColChar = false;
-
-
-
-            GenerateCharTiles(true);
-        }
-
-        if (Input.GetMouseButtonDown(2))
-        {
-            isRowChar = false;
-            isColChar = false;
-
-            GenerateCharTiles(false);
-
+            GenerateAvatarTile();
         }
     }
 
@@ -167,7 +154,7 @@ public class GameTileBase : MonoBehaviour
 
     }
 
-    public void GenerateCharTiles(bool isRowChar)
+    public void GenerateCharTile(bool isRowChar)
     {
         this.isRowChar = isRowChar;
         isColChar = !isRowChar;
@@ -182,6 +169,22 @@ public class GameTileBase : MonoBehaviour
         {
             arrowMark.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
         }
+    }
+
+    public void GenerateAvatarTile()
+    {
+        isRowChar = false;
+        isRowChar = false;
+
+        if (arrowMark.GetComponent<SpriteRenderer>().enabled)
+        {
+            arrowMark.GetComponent<SpriteRenderer>().enabled = false; 
+        }
+
+        gameTileType = GameTileType.None;
+        tileType = TileType.Avatar;
+
+        SetGameTileType(gameTileType);
     }
 
 
@@ -310,7 +313,13 @@ public class GameTileBase : MonoBehaviour
     {
         this.gameTileType = gameTileType;
 
+        if (tileType == TileType.Avatar)
+        {
+            tileImage.sprite = LoadTileSprite(Utilities.AvatarIcon);
+        } else
+        {
         tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
+        }
     }
 
 

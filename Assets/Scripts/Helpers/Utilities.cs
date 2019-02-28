@@ -17,6 +17,7 @@ namespace Assets.Scripts.Helpers
         public static string BaseGameTile = "BaseGameTile";
         public static string CharGameTile = "CharGameTile";
         public static string GameBoard = "GameBoard";
+        public static string AvatarIcon = "T_AvatarIcon";
         
 
         public static string FindTileType(TileType tileType, GameTileType gameTile)
@@ -26,7 +27,7 @@ namespace Assets.Scripts.Helpers
 
         public static int NumOfGameTileTypes()
         {
-            return Enum.GetNames(typeof(GameTileType)).Length;
+            return Enum.GetNames(typeof(GameTileType)).Length - 1;
         }
 
         public static float ColumnOffset = 0; //-3.49f;
@@ -39,7 +40,8 @@ namespace Assets.Scripts.Helpers
         Water,
         Earth,
         Fire,
-        Equalist
+        Equalist,
+        None
     }
 
     public enum TileType
