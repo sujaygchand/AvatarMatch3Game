@@ -18,7 +18,7 @@ public class GameBoard : MonoBehaviour
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
     private GridTitle[,] gameGrid;
-    private float destructionWaitTime = 0.55f;
+    private float destructionWaitTime = 0.85f;
     private bool isRefiliing = false;
     private bool ischecking = true;
 
@@ -141,7 +141,7 @@ public class GameBoard : MonoBehaviour
 
         Vector2 tempCoord = new Vector2(x, y);
         tempCoord.x += Utilities.ColumnOffset;
-        tempCoord.y += Utilities.RowOffset + 5;
+        tempCoord.y += Utilities.RowOffset + 2;
 
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
@@ -249,6 +249,8 @@ public class GameBoard : MonoBehaviour
     {
         if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
         {
+            matchesManager.MakeSpecialTileCheck();
+
             matchesManager.currentMatches.Remove(allGameTiles[col, row]);
             allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect(destructionWaitTime);
             
@@ -373,12 +375,9 @@ public class GameBoard : MonoBehaviour
             DestroyMatches();
         }
 
+        matchesManager.currentMatches.Clear();
+        currentTile = null;
         yield return new WaitForSeconds(destructionWaitTime);
-
-        while (CheckForEmptySlots())
-        {
-            AdditionalMatchCheck();
-        }
 
         currentPlayerState = PlayerState.Active;
     }

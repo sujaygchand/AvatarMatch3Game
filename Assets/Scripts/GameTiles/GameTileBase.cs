@@ -41,6 +41,7 @@ public class GameTileBase : MonoBehaviour
     public bool additonalCheck = false;
 
     public GameObject matchedParent;
+    public SwipeDirection swipeDirection = SwipeDirection.None;
 
     // Start is called before the first frame update
 
@@ -56,6 +57,7 @@ public class GameTileBase : MonoBehaviour
 
         targetPosition = new Vector2(currentCol, currentRow);
         gameBoard = GameObject.FindGameObjectWithTag(Utilities.GameBoard).GetComponent<GameBoard>();
+        gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
 
         matchesManager = FindObjectOfType<MatchesManager>();
         //print(matchesManager.gameObject);
@@ -200,6 +202,7 @@ public class GameTileBase : MonoBehaviour
                 {
                     print(otherTile);
 
+                    swipeDirection = SwipeDirection.Up;
                     previousRow = currentRow;
                     previousCol = currentCol;
                     otherTile.GetComponent<GameTileBase>().currentRow -= 1;
@@ -219,7 +222,7 @@ public class GameTileBase : MonoBehaviour
 
                 if (otherTile.GetComponent<GameTileBase>())
                 {
-                  
+                    swipeDirection = SwipeDirection.Right;
                     previousRow = currentRow;
                     previousCol = currentCol;
                     otherTile.GetComponent<GameTileBase>().currentCol--;
@@ -239,7 +242,7 @@ public class GameTileBase : MonoBehaviour
 
                 if (otherTile.GetComponent<GameTileBase>())
                 {
-                   
+                    swipeDirection = SwipeDirection.Down;
                     previousRow = currentRow;
                     previousCol = currentCol;
                     otherTile.GetComponent<GameTileBase>().currentRow++;
@@ -259,7 +262,7 @@ public class GameTileBase : MonoBehaviour
 
                 if (otherTile.GetComponent<GameTileBase>())
                 {
-                    
+                    swipeDirection = SwipeDirection.Left;
                     previousRow = currentRow;
                     previousCol = currentCol;
                     otherTile.GetComponent<GameTileBase>().currentCol++;
@@ -328,6 +331,11 @@ public class GameTileBase : MonoBehaviour
 
     }
 
+    public GameObject GetOtherTile()
+    {
+        return otherTile;
+    }
+
     private IEnumerator CheckMoveMade_Cor()
     {
         yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - .15f);
@@ -342,6 +350,7 @@ public class GameTileBase : MonoBehaviour
                 currentRow = previousRow;
 
                 yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+                gameBoard.currentTile = null;
                 gameBoard.currentPlayerState = PlayerState.Active;
             }
             else
@@ -350,6 +359,7 @@ public class GameTileBase : MonoBehaviour
                 
             }
 
+            swipeDirection = SwipeDirection.None;
             otherTile = null;
         }
     }

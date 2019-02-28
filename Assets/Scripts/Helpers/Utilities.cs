@@ -46,12 +46,13 @@ namespace Assets.Scripts.Helpers
     {
         Normal,
         Char,
-        Weapon
+        Weapon,
+        Avatar
     }
 
-    public enum BoardDirection
+    public enum SwipeDirection
     {
-        Current,
+        None,
         Up,
         Right,
         Down,

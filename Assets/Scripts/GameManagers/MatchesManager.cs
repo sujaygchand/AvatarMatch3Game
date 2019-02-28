@@ -165,14 +165,49 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
-    public void MakeSpecialTile()
+    public void MakeSpecialTileCheck()
     {
+        // Check if move was made
+        if (gameBoard.currentTile)
+        {
+            if(currentMatches.Count == 4 || currentMatches.Count == 7)
+            {
+                if(gameBoard.currentTile.swipeDirection == SwipeDirection.Left || gameBoard.currentTile.swipeDirection == SwipeDirection.Right)
+                {
+                    MakeCharTile(true);
+                }
+
+                if (gameBoard.currentTile.swipeDirection == SwipeDirection.Down || gameBoard.currentTile.swipeDirection == SwipeDirection.Up)
+                {
+                    MakeCharTile(false);
+                }
+            }
+            
+        }
         
     }
 
-    public void MakeCharTile()
+    public void MakeCharTile(bool isRow)
     {
+        // Make bomb
+        if (gameBoard.currentTile.GetHasMatched())
+        {
+            gameBoard.currentTile.SetHasMatched(false);
 
+            gameBoard.currentTile.GetComponent<GameTileBase>().GenerateCharTiles(isRow);
+        }
+        
+        else if(gameBoard.currentTile.GetOtherTile())
+        {
+            GameTileBase otherTile = gameBoard.currentTile.GetOtherTile().GetComponent<GameTileBase>();
+
+            if (otherTile.GetHasMatched())
+            {
+                otherTile.SetHasMatched(false);
+
+                otherTile.GenerateCharTiles(isRow);
+            }
+        }
     }
 
 
