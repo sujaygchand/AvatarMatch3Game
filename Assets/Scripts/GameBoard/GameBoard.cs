@@ -240,7 +240,8 @@ public class GameBoard : MonoBehaviour
                 }
             }
         }
-        
+
+        matchesManager.currentMatches.Clear();
         StartCoroutine(CollapseRow_Cor());
     }
 
@@ -248,9 +249,12 @@ public class GameBoard : MonoBehaviour
     {
         if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
         {
+            currentPlayerState = PlayerState.Wait;
             matchesManager.MakeSpecialTileCheck();
 
+            // Causing match bug
             matchesManager.currentMatches.Remove(allGameTiles[col, row]);
+
             allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect(destructionWaitTime);
             
             allGameTiles[col, row] = null;
@@ -269,7 +273,7 @@ public class GameBoard : MonoBehaviour
 
     private IEnumerator CollapseRow_Cor()
     {
-        yield return new WaitForSeconds(destructionWaitTime);
+        yield return new WaitForSeconds(destructionWaitTime - .15f);
 
         for (int i = 0; i < width; i++)
         {
@@ -352,9 +356,12 @@ public class GameBoard : MonoBehaviour
 
             foreach (GameObject tile in allGameTiles)
             {
-                if (tile.GetComponent<GameTileBase>().GetHasMatched())
+                if (tile)
                 {
-                    tile.GetComponent<GameTileBase>().additonalCheck = true;
+                    if (tile.GetComponent<GameTileBase>().GetHasMatched())
+                    {
+                        tile.GetComponent<GameTileBase>().additonalCheck = true;
+                    }
                 }
             }
         }
@@ -377,7 +384,7 @@ public class GameBoard : MonoBehaviour
         matchesManager.currentMatches.Clear();
         currentTile = null;
         yield return new WaitForSeconds(destructionWaitTime);
-
+        
         currentPlayerState = PlayerState.Active;
     }
 }

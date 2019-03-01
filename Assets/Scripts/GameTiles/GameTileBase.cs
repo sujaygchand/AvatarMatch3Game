@@ -156,6 +156,11 @@ public class GameTileBase : MonoBehaviour
 
     public void GenerateCharTile(bool isRowChar)
     {
+        if(tileType == TileType.Avatar)
+        {
+            return;
+        }
+
         this.isRowChar = isRowChar;
         isColChar = !isRowChar;
 
@@ -347,6 +352,17 @@ public class GameTileBase : MonoBehaviour
 
     private IEnumerator CheckMoveMade_Cor()
     {
+        // Handle Avatar Tile Move
+        if(tileType == TileType.Avatar)
+        {
+            matchesManager.MatchAvatarTile(otherTile);
+            hasMatched = true;
+        } else if (otherTile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
+        {
+            matchesManager.MatchAvatarTile(gameObject);
+            otherTile.GetComponent<GameTileBase>().SetHasMatched(true);
+        }
+
         yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - .15f);
         if (otherTile)
         {
