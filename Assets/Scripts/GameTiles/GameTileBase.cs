@@ -21,7 +21,8 @@ public class GameTileBase : MonoBehaviour
     [SerializeField] public bool isRowChar = false;
     [SerializeField] public bool isColChar = false;
     [SerializeField] public bool isAvatarTile = false;
-    [SerializeField] private GameObject arrowMark;
+    [SerializeField] private GameObject arrowMask;
+    [SerializeField] private GameObject gliderMask;
 
     [SerializeField]  protected SpriteRenderer tileImage;
     protected GameObject otherTile;
@@ -49,7 +50,8 @@ public class GameTileBase : MonoBehaviour
     private void Awake()
     {
         tileImage = GetComponent<SpriteRenderer>();
-        arrowMark.GetComponent<SpriteRenderer>().enabled = false;
+        arrowMask.GetComponent<SpriteRenderer>().enabled = false;
+        gliderMask.GetComponent<SpriteRenderer>().enabled = false;
     }
 
     void Start()
@@ -76,32 +78,36 @@ public class GameTileBase : MonoBehaviour
         targetPosition.x = currentCol + Utilities.ColumnOffset;
         targetPosition.y = currentRow + Utilities.RowOffset;
 
-        if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
+        if (gameBoard)
         {
-            transform.position = Vector2.Lerp(transform.position, targetPosition, swipeLerp);
 
-            if (gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
+            if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
             {
-                gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
-                
-            }
-            matchesManager.CheckForMatches();
-        }
-        else
-        {
-            transform.position = targetPosition;
+                transform.position = Vector2.Lerp(transform.position, targetPosition, swipeLerp);
 
-            if (gameBoard.allGameTiles[currentCol, currentRow])
+                if (gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
+                {
+                    gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+
+                }
+                matchesManager.CheckForMatches();
+            }
+            else
             {
-                gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
-                //FindMatches();
-            }
-        }
+                transform.position = targetPosition;
 
-        if (additonalCheck && hasMatched)
-        {
-            additonalCheck = false;
-            matchesManager.CheckForMatches();
+                if (gameBoard.allGameTiles[currentCol, currentRow])
+                {
+                    gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+                    //FindMatches();
+                }
+            }
+
+            if (additonalCheck && hasMatched)
+            {
+                additonalCheck = false;
+                matchesManager.CheckForMatches();
+            }
         }
 
     }
@@ -132,7 +138,12 @@ public class GameTileBase : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            GenerateAvatarTile();
+            GenerateGliderTile();
+        }
+
+        if (Input.GetMouseButtonDown(2))
+        {
+            SetGameTileType(GameTileType.Earth);
         }
     }
 
@@ -142,10 +153,10 @@ public class GameTileBase : MonoBehaviour
         if (Mathf.Abs(finalTouchPosition.y - initialTouchPosition.y) > swipeThreshold
             || Mathf.Abs(finalTouchPosition.x - initialTouchPosition.x) > swipeThreshold)
         {
+            gameBoard.currentPlayerState = PlayerState.Wait;
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - initialTouchPosition.y, finalTouchPosition.x - initialTouchPosition.x);
             swipeAngle *= 180 / Mathf.PI;
-            MovePieces();
-            gameBoard.currentPlayerState = PlayerState.Wait;
+            MoveTiles();
             gameBoard.currentTile = this;
         } else
         {
@@ -164,7 +175,13 @@ public class GameTileBase : MonoBehaviour
         this.isRowChar = isRowChar;
         isColChar = !isRowChar;
 
-        arrowMark.GetComponent<SpriteRenderer>().enabled = true;
+
+        if (gliderMask.GetComponent<SpriteRenderer>().enabled)
+        {
+            gliderMask.GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+        arrowMask.GetComponent<SpriteRenderer>().enabled = true;
 
         tileType = TileType.Char;
 
@@ -172,8 +189,32 @@ public class GameTileBase : MonoBehaviour
 
         if (!isRowChar)
         {
-            arrowMark.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+            arrowMask.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+        } else
+        {
+            arrowMask.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
         }
+
+    }
+
+    public void GenerateGliderTile()
+    {
+        if(tileType == TileType.Avatar)
+        {
+            return;
+        }
+
+        isRowChar = false;
+        isColChar = false;
+
+        tileType = TileType.Glider;
+
+        if (arrowMask.GetComponent<SpriteRenderer>().enabled)
+        {
+            arrowMask.GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+        gliderMask.GetComponent<SpriteRenderer>().enabled = true;
     }
 
     public void GenerateAvatarTile()
@@ -181,9 +222,9 @@ public class GameTileBase : MonoBehaviour
         isRowChar = false;
         isRowChar = false;
 
-        if (arrowMark.GetComponent<SpriteRenderer>().enabled)
+        if (arrowMask.GetComponent<SpriteRenderer>().enabled)
         {
-            arrowMark.GetComponent<SpriteRenderer>().enabled = false; 
+            arrowMask.GetComponent<SpriteRenderer>().enabled = false; 
         }
 
         gameTileType = GameTileType.None;
@@ -193,90 +234,58 @@ public class GameTileBase : MonoBehaviour
     }
 
 
-    public void MovePieces()
+    public void MoveTiles()
     {
-        
         // Swipe Up
         if (swipeAngle < 135 && swipeAngle >= 45 && currentRow < gameBoard.height - 1)
         {
-            // Simultaneous assignment and null pointer check
-            if (gameBoard.allGameTiles[currentCol, currentRow + 1])
-            {
-                otherTile = gameBoard.allGameTiles[currentCol, currentRow + 1];
-
-                print(otherTile);
-
-                if (otherTile.GetComponent<GameTileBase>())
-                {
-                    print(otherTile);
-
-                    swipeDirection = SwipeDirection.Up;
-                    previousRow = currentRow;
-                    previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentRow -= 1;
-                    currentRow++;
-                    CorountineTileTrigger();
-                }
-            }
+            MoveTilesAction(0, 1, SwipeDirection.Up);
         }
 
         // Swipe Right
         else if (swipeAngle < 45 && swipeAngle >= -45 && currentCol < gameBoard.width - 1)
         {
-            // Simultaneous assignment and null pointer check
-            if (gameBoard.allGameTiles[currentCol + 1, currentRow])
-            {
-                otherTile = gameBoard.allGameTiles[currentCol + 1, currentRow];
-
-                if (otherTile.GetComponent<GameTileBase>())
-                {
-                    swipeDirection = SwipeDirection.Right;
-                    previousRow = currentRow;
-                    previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentCol--;
-                    currentCol++;
-                    CorountineTileTrigger();
-                }
-            }
+            MoveTilesAction(1, 0, SwipeDirection.Right);
         }
 
         // Swipe Down
         else if (swipeAngle < -45 && swipeAngle >= -135 && currentRow > 0)
         {
-            // Simultaneous assignment and null pointer check
-            if (gameBoard.allGameTiles[currentCol, currentRow - 1])
-            {
-                otherTile = gameBoard.allGameTiles[currentCol, currentRow - 1];
-
-                if (otherTile.GetComponent<GameTileBase>())
-                {
-                    swipeDirection = SwipeDirection.Down;
-                    previousRow = currentRow;
-                    previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentRow++;
-                    currentRow--;
-                    CorountineTileTrigger();
-                }
-            }
+            MoveTilesAction(0, -1, SwipeDirection.Down);
         }
 
         // Swipe Left
         else if (swipeAngle < -135 || swipeAngle >= 135 && currentCol > 0)
         {
-            // Simultaneous assignment and null pointer check
-            if (gameBoard.allGameTiles[currentCol - 1, currentRow])
-            {
-                otherTile = gameBoard.allGameTiles[currentCol - 1, currentRow];
+            MoveTilesAction(-1, 0, SwipeDirection.Left);
+        }
 
-                if (otherTile.GetComponent<GameTileBase>())
-                {
-                    swipeDirection = SwipeDirection.Left;
-                    previousRow = currentRow;
-                    previousCol = currentCol;
-                    otherTile.GetComponent<GameTileBase>().currentCol++;
-                    currentCol--;
-                    CorountineTileTrigger();
-                }
+        if (!otherTile)
+        {
+            gameBoard.currentPlayerState = PlayerState.Active;
+        }
+    }
+
+    private void MoveTilesAction(int deltaCol, int deltaRow, SwipeDirection swipeDirection)
+    {
+        int newCol = currentCol + deltaCol;
+        int newRow = currentRow + deltaRow;
+
+        if (gameBoard.allGameTiles[newCol, newRow])
+        {
+
+            otherTile = gameBoard.allGameTiles[newCol, newRow];
+
+            if (otherTile.GetComponent<GameTileBase>())
+            {
+                this.swipeDirection = swipeDirection;
+                previousCol = currentCol;
+                previousRow = currentRow;
+                otherTile.GetComponent<GameTileBase>().currentCol -= deltaCol;
+                otherTile.GetComponent<GameTileBase>().currentRow -= deltaRow;
+                currentCol += deltaCol;
+                currentRow += deltaRow;
+                CorountineTileTrigger();
             }
         }
     }
@@ -290,6 +299,8 @@ public class GameTileBase : MonoBehaviour
     private IEnumerator DestructionEffect_Cor(float waitTime)
     {
         tileImage.color = new Color(0f, 0f, 0f, .3f);
+        arrowMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
+        gliderMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
         yield return new WaitForSeconds(waitTime);
 
         Destroy(gameObject);
@@ -392,11 +403,7 @@ public class GameTileBase : MonoBehaviour
     public void CorountineTileTrigger()
     {
         StartCoroutine(CheckMoveMade_Cor());
-        //matchesManager.CheckForMatches();
-        /* gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
-         print(this.gameObject);
-         StartCoroutine(LerpTile());
-         */
+
     }
 
     private IEnumerator LerpTile()

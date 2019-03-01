@@ -45,7 +45,6 @@ public class MatchesManager : MonoBehaviour
     {
         yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - 0.25f);
 
-
         if (gameBoard)
         {
             for (int i = 0; i < gameBoard.width; i++)
@@ -76,7 +75,8 @@ public class MatchesManager : MonoBehaviour
 
                                     GameObject[] tiles = { currentTile, rowTile1, rowTile2 };
 
-                                    CheckForCharTiles(tiles);
+                                    MatchCharTile(tiles);
+                                    MatchGliderTile(tiles);
 
                                     AddToList(tiles);
 
@@ -99,7 +99,8 @@ public class MatchesManager : MonoBehaviour
                                     {
                                         GameObject[] tiles = { currentTile, colTile1, colTile2 };
 
-                                        CheckForCharTiles(tiles);
+                                        MatchCharTile(tiles);
+                                        MatchGliderTile(tiles);
 
                                         AddToList(tiles);
                                     }
@@ -152,18 +153,41 @@ public class MatchesManager : MonoBehaviour
         return tiles;
     }
 
-    private void CheckForCharTiles(GameObject[] tiles)
+    private bool CheckMatchAlignment(int passValue)
     {
-        foreach(GameObject tile in tiles)
+        int numOfColTiles = 0;
+        int numOfRowTiles = 0;
+
+        if (currentMatches[0].GetComponent<GameTileBase>())
         {
-            if (tile.GetComponent<GameTileBase>().isRowChar)
+            GameTileBase firstTile = currentMatches[0].GetComponent<GameTileBase>();
+
+        foreach (GameObject tile in currentMatches)
             {
-                currentMatches.Union(GetRowMatches(tile.GetComponent<GameTileBase>().currentRow));
+
+                if (tile.GetComponent<GameTileBase>())
+                {
+                    GameTileBase gameTile = tile.GetComponent<GameTileBase>();
+
+                    if(gameTile.currentCol == firstTile.currentCol)
+                    {
+                        numOfColTiles++;
+                    }
+                    if(gameTile.currentRow == firstTile.currentRow)
+                    {
+                        numOfRowTiles++;
+                    }
+                }
             }
-            else if (tile.GetComponent<GameTileBase>().isColChar)
-            {
-                currentMatches.Union(GetColMatches(tile.GetComponent<GameTileBase>().currentCol));
-            }
+        }
+
+        if(numOfColTiles == passValue || numOfRowTiles == passValue)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -172,8 +196,10 @@ public class MatchesManager : MonoBehaviour
         // Check if move was made
         if (gameBoard.currentTile)
         {
+
             if(currentMatches.Count == 4 || currentMatches.Count == 7)
             {
+                
                 if(gameBoard.currentTile.swipeDirection == SwipeDirection.Left || gameBoard.currentTile.swipeDirection == SwipeDirection.Right)
                 {
                     MakeCharTile(true);
@@ -185,14 +211,26 @@ public class MatchesManager : MonoBehaviour
                 }
             }
 
-            else if(currentMatches.Count == 5 || currentMatches.Count >= 8)
+            else if(currentMatches.Count == 5 || currentMatches.Count == 8)
             {
-                //MakeAvatarTile();
+                if (CheckMatchAlignment(5))
+                {
+                    MakeAvatarTile();
+                    print("Make Avatar");
+
+                }
+                else
+                {
+                    MakeGliderTile();
+                    print("Make Glide");
+                }
+                
             }
             
         }
         
     }
+
 
     public void MakeCharTile(bool isRow)
     {
@@ -217,6 +255,27 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
+
+    public void MakeGliderTile()
+    {
+        if (gameBoard.currentTile.GetHasMatched())
+        {
+            gameBoard.currentTile.SetHasMatched(false);
+
+            gameBoard.currentTile.GetComponent<GameTileBase>().GenerateGliderTile();
+        } 
+        else if (gameBoard.currentTile.GetOtherTile())
+        {
+            GameTileBase otherTile = gameBoard.currentTile.GetOtherTile().GetComponent<GameTileBase>();
+
+            if (otherTile.GetHasMatched())
+            {
+                otherTile.SetHasMatched(false);
+
+                otherTile.GenerateGliderTile();
+            }
+        }
+    }
 
     public void MakeAvatarTile()
     {
@@ -244,6 +303,64 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
+    private void MatchCharTile(GameObject[] tiles)
+    {
+        foreach (GameObject tile in tiles)
+        {
+            if (tile.GetComponent<GameTileBase>().isRowChar)
+            {
+                currentMatches.Union(GetRowMatches(tile.GetComponent<GameTileBase>().currentRow));
+            }
+            else if (tile.GetComponent<GameTileBase>().isColChar)
+            {
+                currentMatches.Union(GetColMatches(tile.GetComponent<GameTileBase>().currentCol));
+            }
+        }
+    }
+
+    private void MatchGliderTile(GameObject[] tiles)
+    {
+        foreach(GameObject tile in tiles)
+        {
+            if (tile.GetComponent<GameTileBase>())
+            {
+                GameTileBase tempTile = tile.GetComponent<GameTileBase>();
+
+                if (tempTile.GetTileType() == TileType.Glider)
+                {
+                    currentMatches.Union(GetGliderMatches(tempTile.currentCol, tempTile.currentRow));
+                }
+            }
+        }
+    }
+
+
+    public void MatchAvatarTile(GameObject tile)
+    {
+        GameTileType testTileType = tile.GetComponent<GameTileBase>().GetGameTileType();
+
+        for (int i = 0; i < gameBoard.width; i++)
+        {
+            for (int j = 0; j < gameBoard.height; j++)
+            {
+                if (gameBoard.allGameTiles[i, j])
+                {
+                    if (tile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
+                    {
+                        gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
+                    }
+
+                    else if (gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetGameTileType() == testTileType)
+                    {
+                        gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
+                    }
+                }
+            }
+        }
+    }
+
+
+
     public bool CheckForAvatarTileInList()
     {
         foreach(GameObject tile in currentMatches)
@@ -255,6 +372,24 @@ public class MatchesManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    private List<GameObject> GetGliderMatches(int col, int row)
+    {
+        List<GameObject> tiles = new List<GameObject>();
+
+        for(int i = col - 1; i <= col + 1; i++)
+        {
+            for(int j = row - 1; j <= row + 1; j++)
+            {
+                // Check if the piece is inside the board
+                if(i >= 0 && i < gameBoard.width && j >= 0 && j < gameBoard.height) { 
+}                   tiles.Add(gameBoard.allGameTiles[i, j]);
+                    gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
+            }
+        }
+
+        return tiles;
     }
 
     private List<GameObject> GetColMatches(int col)
@@ -286,30 +421,6 @@ public class MatchesManager : MonoBehaviour
         }
         return tiles;
     }
-
-    public void MatchAvatarTile(GameObject tile)
-    {
-            GameTileType testTileType = tile.GetComponent<GameTileBase>().GetGameTileType();
-
-            for (int i = 0; i < gameBoard.width; i++)
-            {
-                for (int j = 0; j < gameBoard.height; j++)
-                {
-                    if (gameBoard.allGameTiles[i, j])
-                    {
-                    if (tile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
-                    {
-                        gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
-                    }
-
-                        else if (gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetGameTileType() == testTileType)
-                        {
-                            gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
-                        }
-                    }
-                }
-            }
-        }
 
     private List<GameObject> GetAvatarMatches(GameObject tile)
     {

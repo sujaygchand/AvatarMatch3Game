@@ -48,7 +48,7 @@ namespace Assets.Scripts.Helpers
     {
         Normal,
         Char,
-        Weapon,
+        Glider,
         Avatar
     }
 

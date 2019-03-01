@@ -253,7 +253,7 @@ public class GameBoard : MonoBehaviour
             matchesManager.MakeSpecialTileCheck();
 
             // Causing match bug
-            matchesManager.currentMatches.Remove(allGameTiles[col, row]);
+            //matchesManager.currentMatches.Remove(allGameTiles[col, row]);
 
             allGameTiles[col, row].GetComponent<GameTileBase>().PlayMatchedEffect(destructionWaitTime);
             
