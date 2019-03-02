@@ -138,7 +138,7 @@ public class GameTileBase : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            GenerateGliderTile();
+            GenerateCharTile(false);
         }
 
         if (Input.GetMouseButtonDown(2))
@@ -309,7 +309,6 @@ public class GameTileBase : MonoBehaviour
 
     public Sprite LoadTileSprite(string tile)
     {
-
         Sprite tempSprite = Resources.Load<Sprite>("Tiles/" + tile);
 
         return tempSprite;

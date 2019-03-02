@@ -34,36 +34,41 @@ namespace Assets.Scripts.Helpers
         public static float RowOffset = 0; //-7.04f;
     }
 
-    public enum GameTileType
-    {
-        Air,
-        Water,
-        Earth,
-        Fire,
-        Equalist,
-        None
-    }
+}
 
-    public enum TileType
-    {
-        Normal,
-        Char,
-        Glider,
-        Avatar
-    }
+public enum GameTileType
+{
+    Air,
+    Water,
+    Earth,
+    Fire,
+    Equalist,
+    WaterTribe,
+    EarthTribe,
+    FireTribe,
+    AirTribe,
+    None
+}
 
-    public enum SwipeDirection
-    {
-        None,
-        Up,
-        Right,
-        Down,
-        Left
-    }
+public enum TileType
+{
+    Normal,
+    Char,
+    Glider,
+    Avatar
+}
 
-    public enum PlayerState
-    {
-        Wait,
-        Active
-    }
+public enum SwipeDirection
+{
+    None,
+    Up,
+    Right,
+    Down,
+    Left
+}
+
+public enum PlayerState
+{
+    Wait,
+    Active
 }

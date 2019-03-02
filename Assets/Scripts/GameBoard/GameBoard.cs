@@ -13,6 +13,7 @@ public class GameBoard : MonoBehaviour
     public GameTileBase currentTile;
     public int NumOfTileTypes = 0;
     private MatchesManager matchesManager;
+    private Deadlock deadlock;
 
     [SerializeField] GameObject s_GridTile;
     [SerializeField] GameObject s_GameTile;
@@ -59,6 +60,7 @@ public class GameBoard : MonoBehaviour
         //gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
 
         matchesManager = FindObjectOfType<MatchesManager>();
+        deadlock = FindObjectOfType<Deadlock>();
 
     }
 
@@ -384,7 +386,9 @@ public class GameBoard : MonoBehaviour
         matchesManager.currentMatches.Clear();
         currentTile = null;
         yield return new WaitForSeconds(destructionWaitTime);
-        
+
+        deadlock.FixDeadLock();
+
         currentPlayerState = PlayerState.Active;
     }
 }
