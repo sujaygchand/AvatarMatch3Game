@@ -93,7 +93,7 @@ public class Deadlock : MonoBehaviour
                 {
                     if(gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
                     {
-                        //return true;
+                        return true;
                     }
 
                     if (FindMatchAt(i, j, 1, 0))
@@ -101,7 +101,7 @@ public class Deadlock : MonoBehaviour
                         return true;
                     }
 
-                    else if(FindMatchAt(i, j, 0, 1))
+                    if(FindMatchAt(i, j, 0, 1))
                     {
                         return true;
                     }
