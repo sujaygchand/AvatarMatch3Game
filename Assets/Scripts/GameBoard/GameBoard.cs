@@ -64,6 +64,35 @@ public class GameBoard : MonoBehaviour
 
     }
 
+    void Update()
+    {
+        /*
+        if (ischecking)
+        {
+            if (CheckBoardFilled())
+            {
+                ischecking = false;
+            }
+        } 
+        */
+    }
+
+    private bool CheckBoardFilled()
+    {
+        for(int i = 0; i < width; i++)
+        {
+            for(int j = 0; j < height; j++)
+            {
+                if(allGameTiles[i, j] == null)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /*
      * Draws the background tiles for a sizeable game board 
      */
@@ -143,7 +172,7 @@ public class GameBoard : MonoBehaviour
 
         Vector2 tempCoord = new Vector2(x, y);
         tempCoord.x += Utilities.ColumnOffset;
-        tempCoord.y += Utilities.RowOffset + 2;
+        tempCoord.y += Utilities.RowOffset + 1.5f;
 
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
@@ -232,6 +261,8 @@ public class GameBoard : MonoBehaviour
 
     public void DestroyMatches()
     {
+        ischecking = true;
+
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -369,6 +400,8 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    //private bool Check
+
     
     private IEnumerator RefillBoard_cor()
     {
@@ -385,9 +418,11 @@ public class GameBoard : MonoBehaviour
 
         matchesManager.currentMatches.Clear();
         currentTile = null;
-        yield return new WaitForSeconds(destructionWaitTime);
+        yield return new WaitForSeconds(destructionWaitTime + 0.7f);
 
+        //yield return new WaitUntil(()=> ischecking == false);
         deadlock.FixDeadLock();
+        yield return new WaitForSeconds(.1f);
 
         currentPlayerState = PlayerState.Active;
     }

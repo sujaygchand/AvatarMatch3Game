@@ -16,9 +16,9 @@ public class MatchesManager : MonoBehaviour
         gameBoard = FindObjectOfType<GameBoard>();
     }
 
-    public void CheckForMatches()
+    public void CheckForMatches(bool attemptMatch)
     {
-        StartCoroutine(CheckForMatches_Cor());
+        StartCoroutine(CheckForMatches_Cor(attemptMatch));
     }
 
     private void AddToList(GameObject[] tile)
@@ -41,7 +41,7 @@ public class MatchesManager : MonoBehaviour
         gameBoard.DestroyMatches();
     }
 
-    private IEnumerator CheckForMatches_Cor()
+    private IEnumerator CheckForMatches_Cor(bool attemptMatch)
     {
         yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - 0.25f);
 
@@ -75,10 +75,13 @@ public class MatchesManager : MonoBehaviour
 
                                     GameObject[] tiles = { currentTile, rowTile1, rowTile2 };
 
-                                    MatchCharTile(tiles);
-                                    MatchGliderTile(tiles);
+                                    if (attemptMatch)
+                                    {
+                                        MatchCharTile(tiles);
+                                        MatchGliderTile(tiles);
 
-                                    AddToList(tiles);
+                                        AddToList(tiles);
+                                    }
 
                                 }
                             }
@@ -99,10 +102,13 @@ public class MatchesManager : MonoBehaviour
                                     {
                                         GameObject[] tiles = { currentTile, colTile1, colTile2 };
 
-                                        MatchCharTile(tiles);
-                                        MatchGliderTile(tiles);
+                                        if (attemptMatch)
+                                        {
+                                            MatchCharTile(tiles);
+                                            MatchGliderTile(tiles);
 
-                                        AddToList(tiles);
+                                            AddToList(tiles);
+                                        }
                                     }
                                 }
                             }

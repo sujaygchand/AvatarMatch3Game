@@ -5,11 +5,13 @@ using UnityEngine;
 public class Deadlock : MonoBehaviour
 {
     GameBoard gameBoard;
+    MatchesManager matchesManager;
 
     // Start is called before the first frame update
     void Start()
     {
         gameBoard = FindObjectOfType<GameBoard>();
+        matchesManager = FindObjectOfType<MatchesManager>();
     }
 
     public void FixDeadLock()
@@ -25,7 +27,8 @@ public class Deadlock : MonoBehaviour
 
     private bool IsGameDeadlocked()
     {
-        for (int i = 0; i < gameBoard.width; i++)
+
+      for (int i = 0; i < gameBoard.width; i++)
         {
             for(int j = 0; j < gameBoard.height; j++)
             {
@@ -33,7 +36,7 @@ public class Deadlock : MonoBehaviour
                 {
                     if(i < gameBoard.width - 1)
                     {
-                        if(SwapAndCheckForMatch(i, j, 1, 0))
+                        if(CheckForMatchesNeraby(i, j, 1, 0))
                         {
                             return false;
                         }
@@ -41,7 +44,7 @@ public class Deadlock : MonoBehaviour
 
                     if(j < gameBoard.height - 1)
                     {
-                        if(SwapAndCheckForMatch(i, j, 0, 1))
+                        if(CheckForMatchesNeraby(i, j, 0, 1))
                         {
                             return false;
                         }
@@ -54,7 +57,7 @@ public class Deadlock : MonoBehaviour
     }
 
 
-    private bool SwapAndCheckForMatch(int col, int row, int colIncrement, int rowIncrement)
+    private bool CheckForMatchesNeraby(int col, int row, int colIncrement, int rowIncrement)
     {
         TileSwap(col, row, colIncrement, rowIncrement);
         if (AreMatchesOnBoard())
@@ -62,9 +65,12 @@ public class Deadlock : MonoBehaviour
             TileSwap(col, row, colIncrement, rowIncrement);
             return true;
         }
-        
+
+        TileSwap(col, row, colIncrement, rowIncrement);
         return false;
     }
+
+
 
 
     private void TileSwap(int col, int row, int colIncrement, int rowIncrement)
@@ -82,7 +88,6 @@ public class Deadlock : MonoBehaviour
         gameBoard.allGameTiles[col, row] = originalTile;
     }
 
-
     private bool AreMatchesOnBoard()
     {
         for(int i = 0; i < gameBoard.width; i++)
@@ -91,70 +96,154 @@ public class Deadlock : MonoBehaviour
             {
                 if(gameBoard.allGameTiles[i, j])
                 {
+                    GameTileBase currentTile = gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>();
+
                     if(gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
                     {
                         return true;
                     }
 
-                    if (FindMatchAt(i, j, 1, 0))
+                    if (i < gameBoard.width - 2)
                     {
-                        return true;
+                        if(FindMatchAt(i, j, 1, 0))
+                        {
+                                return true;
+                            }
+                        }
                     }
 
-                    if(FindMatchAt(i, j, 0, 1))
+                    if (j < gameBoard.height - 2)
                     {
-                        return true;
+                        if(FindMatchAt(i, j, 0, 1))
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
-            }
-        }
-
         return false;
     }
+        
 
-    private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
+
+private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
+{
+    int tempCol1 = col + colIncrement;
+    int tempCol2 = col + (colIncrement * 2);
+    int tempRow1 = row + rowIncrement;
+    int tempRow2 = row + (rowIncrement * 2);
+
+    int testValue = 0;
+    int testLimit = 0;
+
+    if (colIncrement > rowIncrement)
     {
-        int tempCol1 = col + colIncrement;
-        int tempCol2 = col + (colIncrement * 2);
-        int tempRow1 = row + rowIncrement;
-        int tempRow2 = row + (rowIncrement * 2);
-
-        int testValue = 0;
-        int testLimit = 0;
-
-        if (colIncrement > rowIncrement)
-        {
-            testValue = col;
-            testLimit = gameBoard.width - 2;
-        }
-        else
-        {
-            testValue = row;
-            testLimit = gameBoard.height - 2;
-        }
-
-        if (testValue < testLimit)
-        {
-            // null pointer check
-            if (gameBoard.allGameTiles[tempCol1, tempRow1] &&
-                gameBoard.allGameTiles[tempCol2, tempRow2])
-            {
-                GameTileBase currentTile = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>();
-                GameTileBase otherTile1 = gameBoard.allGameTiles[tempCol1, tempRow1].GetComponent<GameTileBase>();
-                GameTileBase otherTile2 = gameBoard.allGameTiles[tempCol2, tempRow2].GetComponent<GameTileBase>();
-
-                if (currentTile.GetGameTileType() == otherTile1.GetGameTileType() &&
-                    currentTile.GetGameTileType() == otherTile2.GetGameTileType())
-                {
-                    print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
-                    print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
-                    print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
-                    return true;
-                }
-            }
-        }
-        return false;
+        testValue = col;
+        testLimit = gameBoard.width - 2;
+    }
+    else
+    {
+        testValue = row;
+        testLimit = gameBoard.height - 2;
     }
 
+    if (testValue < testLimit)
+    {
+        // null pointer check
+        if (gameBoard.allGameTiles[tempCol1, tempRow1] &&
+            gameBoard.allGameTiles[tempCol2, tempRow2])
+        {
+            GameTileBase currentTile = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>();
+            GameTileBase otherTile1 = gameBoard.allGameTiles[tempCol1, tempRow1].GetComponent<GameTileBase>();
+            GameTileBase otherTile2 = gameBoard.allGameTiles[tempCol2, tempRow2].GetComponent<GameTileBase>();
 
+            if (currentTile.GetGameTileType() == otherTile1.GetGameTileType() &&
+                currentTile.GetGameTileType() == otherTile2.GetGameTileType())
+            {
+                print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
+                print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
+                print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
+                return true;
+            }
+        }
+    }
+    return false;
 }
+}
+
+
+
+/* 
+ private bool FindMatchAt(int col, int row, SwipeDirection swipeDirection)
+ {
+     if (gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>())
+     {
+         GameTileType currentTileType = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>().GetGameTileType();
+
+         int tempCol1 = col;
+         int tempCol2 = col;
+         int tempCol3 = col;
+
+         int tempRow1 = row;
+         int tempRow2 = row;
+         int tempRow3 = row;
+
+         int testValue = 0;
+         int testLimit = 0;
+
+         if (swipeDirection == SwipeDirection.Right && col < gameBoard.width - 3)
+         {
+             testValue = col;
+             testLimit = gameBoard.width - 3;
+
+             tempCol1 += 1;
+             tempCol2 += 2;
+             tempCol3 += 3;
+
+             tempRow1 = row;
+             tempRow2 = row;
+             tempRow3 = row;
+
+         } else if(swipeDirection == SwipeDirection.Up && row < gameBoard.height - 3)
+         {
+             testValue = row;
+             testLimit = gameBoard.height - 3;
+
+             tempCol1 = col;
+             tempCol2 = col;
+             tempCol3 = col;
+
+             tempRow1 += 1;
+             tempRow2 += 2;
+             tempRow3 += 3;
+
+         }
+
+         if(testValue < testLimit)
+         {
+             //print(swipeDirection + " TestV = " + testValue + " , Limit = " + testLimit);
+
+             if(gameBoard.allGameTiles[tempCol1, tempRow1] && gameBoard.allGameTiles[tempCol2, tempRow2]
+                 && gameBoard.allGameTiles[tempCol3, tempRow3])
+             {
+
+                 GameTileType tempGameTile2Type = gameBoard.allGameTiles[tempCol2, tempRow2].GetComponent<GameTileBase>().GetGameTileType();
+                 GameTileType tempGameTile3Type = gameBoard.allGameTiles[tempCol3, tempRow3].GetComponent<GameTileBase>().GetGameTileType();
+
+                 if(tempGameTile2Type == currentTileType && tempGameTile3Type == currentTileType)
+                 {
+                     print(swipeDirection);
+                     print(string.Format("[ {0} , {1}, {2} ]", gameBoard.allGameTiles[col, row], gameBoard.allGameTiles[tempCol2, tempRow2], gameBoard.allGameTiles[tempCol3, tempRow3]));
+                     print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol2, tempRow2, tempCol3, tempRow3));
+
+                     return true;
+                 }
+             }
+
+
+         }
+     }
+
+     return false;
+ }*/
+

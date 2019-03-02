@@ -45,6 +45,8 @@ public class GameTileBase : MonoBehaviour
     public GameObject matchedParent;
     public SwipeDirection swipeDirection = SwipeDirection.None;
 
+    bool test = false;
+
     // Start is called before the first frame update
 
     private void Awake()
@@ -81,7 +83,7 @@ public class GameTileBase : MonoBehaviour
         if (gameBoard)
         {
 
-            if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
+            if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .05)
             {
                 transform.position = Vector2.Lerp(transform.position, targetPosition, swipeLerp);
 
@@ -90,7 +92,7 @@ public class GameTileBase : MonoBehaviour
                     gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
 
                 }
-                matchesManager.CheckForMatches();
+                matchesManager.CheckForMatches(true);
             }
             else
             {
@@ -106,9 +108,11 @@ public class GameTileBase : MonoBehaviour
             if (additonalCheck && hasMatched)
             {
                 additonalCheck = false;
-                matchesManager.CheckForMatches();
+                matchesManager.CheckForMatches(true);
             }
         }
+
+
 
     }
 
