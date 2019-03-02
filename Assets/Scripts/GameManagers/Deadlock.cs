@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Deadlock : MonoBehaviour
 {
-    GameBoard gameBoard;
-    MatchesManager matchesManager;
+    public List<GameObject> possibleCombo = new List<GameObject>();
+    private GameBoard gameBoard;
+    private MatchesManager matchesManager;
 
     // Start is called before the first frame update
     void Start()
@@ -14,16 +15,76 @@ public class Deadlock : MonoBehaviour
         matchesManager = FindObjectOfType<MatchesManager>();
     }
 
+
     public void FixDeadLock()
     {
         if (IsGameDeadlocked())
         {
             print("Deadlocked!!!!");
+            ShuffleBoard();
         } else
         {
             print("Up your arsenal");
         }
     }
+
+    private void ShuffleBoard()
+    {
+        // New collection to store tiles in
+        List<GameObject> newTilesCollection = new List<GameObject>();
+
+        for(int i = 0; i < gameBoard.width; i++)
+        {
+            for(int j = 0; j < gameBoard.height; j++)
+            {
+                if (gameBoard.allGameTiles[i, j])
+                {
+                    newTilesCollection.Add(gameBoard.allGameTiles[i, j]);
+                }
+            }
+        }
+
+        // Shuffle the new board
+        for (int i = 0; i < gameBoard.width; i++)
+        {
+            for(int j = 0; j < gameBoard.height; j++)
+            {
+                int newIndex = Random.Range(0, newTilesCollection.Count);
+
+                GameTileType tempGameTileType = newTilesCollection[newIndex].GetComponent<GameTileBase>().GetGameTileType();
+
+                int maxLoops = 0;
+
+                while (gameBoard.CheckSetUpMatch(i, j, newTilesCollection[newIndex], tempGameTileType) && maxLoops < 25){
+
+                    newIndex = Random.Range(0, newTilesCollection.Count);
+                    maxLoops++;
+                }
+
+                GameTileBase tileScript = newTilesCollection[newIndex].GetComponent<GameTileBase>();
+
+
+                tileScript.currentCol = i;
+                tileScript.currentRow = j;
+                gameBoard.allGameTiles[i, j] = newTilesCollection[newIndex];
+
+                newTilesCollection.Remove(newTilesCollection[newIndex]);
+
+            }
+        }
+
+        // Deadlock Check
+        if (IsGameDeadlocked())
+        {
+            ShuffleBoard();
+            return;
+        } else
+        {
+            matchesManager.CheckForMatches();
+        }
+    }
+
+
 
     private bool IsGameDeadlocked()
     {
@@ -69,8 +130,6 @@ public class Deadlock : MonoBehaviour
         TileSwap(col, row, colIncrement, rowIncrement);
         return false;
     }
-
-
 
 
     private void TileSwap(int col, int row, int colIncrement, int rowIncrement)
@@ -128,6 +187,8 @@ public class Deadlock : MonoBehaviour
 
 private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
 {
+     possibleCombo.Clear();
+
     int tempCol1 = col + colIncrement;
     int tempCol2 = col + (colIncrement * 2);
     int tempRow1 = row + rowIncrement;
@@ -163,87 +224,25 @@ private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
                 print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
                 print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
                 print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
-                return true;
+
+                    GameObject[] combo = { currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject };
+                    MakePossibleCombo(combo);
+                    return true;
             }
         }
     }
     return false;
 }
+
+    private void MakePossibleCombo(GameObject[] tiles)
+    {
+        possibleCombo.Clear();
+
+        foreach(GameObject tile in tiles)
+        {
+            possibleCombo.Add(tile);
+        }
+    }
 }
 
-
-
-/* 
- private bool FindMatchAt(int col, int row, SwipeDirection swipeDirection)
- {
-     if (gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>())
-     {
-         GameTileType currentTileType = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>().GetGameTileType();
-
-         int tempCol1 = col;
-         int tempCol2 = col;
-         int tempCol3 = col;
-
-         int tempRow1 = row;
-         int tempRow2 = row;
-         int tempRow3 = row;
-
-         int testValue = 0;
-         int testLimit = 0;
-
-         if (swipeDirection == SwipeDirection.Right && col < gameBoard.width - 3)
-         {
-             testValue = col;
-             testLimit = gameBoard.width - 3;
-
-             tempCol1 += 1;
-             tempCol2 += 2;
-             tempCol3 += 3;
-
-             tempRow1 = row;
-             tempRow2 = row;
-             tempRow3 = row;
-
-         } else if(swipeDirection == SwipeDirection.Up && row < gameBoard.height - 3)
-         {
-             testValue = row;
-             testLimit = gameBoard.height - 3;
-
-             tempCol1 = col;
-             tempCol2 = col;
-             tempCol3 = col;
-
-             tempRow1 += 1;
-             tempRow2 += 2;
-             tempRow3 += 3;
-
-         }
-
-         if(testValue < testLimit)
-         {
-             //print(swipeDirection + " TestV = " + testValue + " , Limit = " + testLimit);
-
-             if(gameBoard.allGameTiles[tempCol1, tempRow1] && gameBoard.allGameTiles[tempCol2, tempRow2]
-                 && gameBoard.allGameTiles[tempCol3, tempRow3])
-             {
-
-                 GameTileType tempGameTile2Type = gameBoard.allGameTiles[tempCol2, tempRow2].GetComponent<GameTileBase>().GetGameTileType();
-                 GameTileType tempGameTile3Type = gameBoard.allGameTiles[tempCol3, tempRow3].GetComponent<GameTileBase>().GetGameTileType();
-
-                 if(tempGameTile2Type == currentTileType && tempGameTile3Type == currentTileType)
-                 {
-                     print(swipeDirection);
-                     print(string.Format("[ {0} , {1}, {2} ]", gameBoard.allGameTiles[col, row], gameBoard.allGameTiles[tempCol2, tempRow2], gameBoard.allGameTiles[tempCol3, tempRow3]));
-                     print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol2, tempRow2, tempCol3, tempRow3));
-
-                     return true;
-                 }
-             }
-
-
-         }
-     }
-
-     return false;
- }*/
 

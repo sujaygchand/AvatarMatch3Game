@@ -29,6 +29,7 @@ public class GameTileBase : MonoBehaviour
     [SerializeField] protected GameBoard gameBoard;
     public GameObject gameGridObject;
     protected MatchesManager matchesManager;
+    private HintManager hintManager;
 
     protected Vector2 initialTouchPosition;
     protected Vector2 finalTouchPosition;
@@ -45,7 +46,7 @@ public class GameTileBase : MonoBehaviour
     public GameObject matchedParent;
     public SwipeDirection swipeDirection = SwipeDirection.None;
 
-    bool test = false;
+    private bool doOnce = false;
 
     // Start is called before the first frame update
 
@@ -65,7 +66,7 @@ public class GameTileBase : MonoBehaviour
         gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
 
         matchesManager = FindObjectOfType<MatchesManager>();
-        //print(matchesManager.gameObject);
+        hintManager = FindObjectOfType<HintManager>();
 
         previousCol = currentCol;
         previousRow = currentRow;
@@ -92,7 +93,7 @@ public class GameTileBase : MonoBehaviour
                     gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
 
                 }
-                matchesManager.CheckForMatches(true);
+                matchesManager.CheckForMatches();
             }
             else
             {
@@ -108,8 +109,9 @@ public class GameTileBase : MonoBehaviour
             if (additonalCheck && hasMatched)
             {
                 additonalCheck = false;
-                matchesManager.CheckForMatches(true);
+                matchesManager.CheckForMatches();
             }
+
         }
 
 
@@ -121,6 +123,7 @@ public class GameTileBase : MonoBehaviour
         
         if (gameBoard.currentPlayerState == PlayerState.Active)
         {
+            hintManager.DestroyHints();
             initialTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             //print(initialTouchPosition);
         }

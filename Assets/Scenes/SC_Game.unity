@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad66889808c1a804596dd722382a507c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  possibleCombo: []
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,7 +183,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8
+  orthographic size: 7.3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -222,6 +223,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1962836028}
   - component: {fileID: 1962836027}
+  - component: {fileID: 1962836029}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -257,6 +259,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1962836029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962836026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47abc776d1757684cba8973c1db16bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  s_hintDelay: 5
+  s_HintParticle: {fileID: 7817135367957814678, guid: 7c5086507d5f556409580cb5b8bf74a7,
+    type: 3}
 --- !u!1001 &2571361952990260433
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -337,17 +354,17 @@ PrefabInstance:
     - target: {fileID: 778112995106715275, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
         type: 3}
       propertyPath: width
-      value: 5
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 778112995106715275, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
         type: 3}
       propertyPath: height
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 778112995106715275, guid: f9e6770ecbe62114eb9f89e1c0ae3fef,
         type: 3}
       propertyPath: NumOfTileTypes
-      value: 0
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9e6770ecbe62114eb9f89e1c0ae3fef, type: 3}

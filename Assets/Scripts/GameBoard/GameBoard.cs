@@ -22,6 +22,7 @@ public class GameBoard : MonoBehaviour
     private float destructionWaitTime = 0.85f;
     private bool isRefiliing = false;
     private bool ischecking = true;
+    private bool doOnce = true;
 
 
     // Start is called before the first frame update
@@ -66,6 +67,12 @@ public class GameBoard : MonoBehaviour
 
     void Update()
     {
+        if (doOnce)
+        {
+            doOnce = false;
+            deadlock.FixDeadLock();
+        }
+
         /*
         if (ischecking)
         {
@@ -111,6 +118,7 @@ public class GameBoard : MonoBehaviour
                 allGameTiles[i, j] = SpawnTile(s_GameTile, "GameTile", i, j, true);
             }
         }
+
     }
 
 
@@ -192,7 +200,7 @@ public class GameBoard : MonoBehaviour
         allGameTiles[x, y] = tempTile;
     }
 
-    private bool CheckSetUpMatch(int col, int row, GameObject tile, GameTileType tileType)
+    public bool CheckSetUpMatch(int col, int row, GameObject tile, GameTileType tileType)
     {
 
         // Quick method to check when the thrid col/row are tested

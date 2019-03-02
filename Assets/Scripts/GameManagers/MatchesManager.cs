@@ -16,9 +16,9 @@ public class MatchesManager : MonoBehaviour
         gameBoard = FindObjectOfType<GameBoard>();
     }
 
-    public void CheckForMatches(bool attemptMatch)
+    public void CheckForMatches()
     {
-        StartCoroutine(CheckForMatches_Cor(attemptMatch));
+        StartCoroutine(CheckForMatches_Cor());
     }
 
     private void AddToList(GameObject[] tile)
@@ -41,7 +41,7 @@ public class MatchesManager : MonoBehaviour
         gameBoard.DestroyMatches();
     }
 
-    private IEnumerator CheckForMatches_Cor(bool attemptMatch)
+    private IEnumerator CheckForMatches_Cor()
     {
         yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - 0.25f);
 
@@ -75,13 +75,10 @@ public class MatchesManager : MonoBehaviour
 
                                     GameObject[] tiles = { currentTile, rowTile1, rowTile2 };
 
-                                    if (attemptMatch)
-                                    {
                                         MatchCharTile(tiles);
                                         MatchGliderTile(tiles);
 
                                         AddToList(tiles);
-                                    }
 
                                 }
                             }
@@ -102,13 +99,10 @@ public class MatchesManager : MonoBehaviour
                                     {
                                         GameObject[] tiles = { currentTile, colTile1, colTile2 };
 
-                                        if (attemptMatch)
-                                        {
                                             MatchCharTile(tiles);
                                             MatchGliderTile(tiles);
 
                                             AddToList(tiles);
-                                        }
                                     }
                                 }
                             }
