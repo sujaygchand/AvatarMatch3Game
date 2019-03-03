@@ -8,7 +8,7 @@ public class HintManager : MonoBehaviour
     private GameBoard gameBoard;
     private Deadlock deadlock;
     [SerializeField] float s_hintDelayMax;
-    private float hintDelay;
+    public float hintDelay;
 
     [SerializeField] GameObject s_HintParticle;
 
