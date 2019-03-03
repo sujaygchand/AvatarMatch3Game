@@ -30,6 +30,7 @@ public class GameTileBase : MonoBehaviour
     public GameObject gameGridObject;
     protected MatchesManager matchesManager;
     private HintManager hintManager;
+    private ScoreManager scoreManager;
 
     protected Vector2 initialTouchPosition;
     protected Vector2 finalTouchPosition;
@@ -67,6 +68,7 @@ public class GameTileBase : MonoBehaviour
 
         matchesManager = FindObjectOfType<MatchesManager>();
         hintManager = FindObjectOfType<HintManager>();
+        scoreManager = FindObjectOfType<ScoreManager>();
 
         previousCol = currentCol;
         previousRow = currentRow;
@@ -305,10 +307,21 @@ public class GameTileBase : MonoBehaviour
 
     private IEnumerator DestructionEffect_Cor(float waitTime)
     {
+        hintManager.DestroyHints();
         tileImage.color = new Color(0f, 0f, 0f, .3f);
         arrowMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
         gliderMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
-        yield return new WaitForSeconds(waitTime);
+
+        if (scoreManager.gameMode == GameMode.Collection && tileType != TileType.Avatar)
+        {
+            scoreManager.AddToScore(-1);
+        }
+        else
+        {
+            scoreManager.AddToScore(+1);
+        }
+
+        yield return new WaitForSeconds(waitTime - .3f);
 
         Destroy(gameObject);
         

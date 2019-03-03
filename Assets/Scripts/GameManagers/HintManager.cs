@@ -7,8 +7,8 @@ public class HintManager : MonoBehaviour
     public HashSet<GameObject> currentHints = new HashSet<GameObject>();
     private GameBoard gameBoard;
     private Deadlock deadlock;
-    [SerializeField] float s_hintDelay;
-    private float hintDelaySeconds;
+    [SerializeField] float s_hintDelayMax;
+    private float hintDelay;
 
     [SerializeField] GameObject s_HintParticle;
 
@@ -18,43 +18,54 @@ public class HintManager : MonoBehaviour
         gameBoard = FindObjectOfType<GameBoard>();
         deadlock = FindObjectOfType<Deadlock>();
 
-        hintDelaySeconds = s_hintDelay;
+        hintDelay = s_hintDelayMax;
     }
 
     private void Update()
     {
-        hintDelaySeconds -= Time.deltaTime;
-        
-        if(hintDelaySeconds <= 0 && currentHints.Count <= 0)
+        if (gameBoard.currentPlayerState == PlayerState.Active)
         {
-            SetAndSpawnHints();
+
+            hintDelay -= Time.deltaTime;
+
+            if (hintDelay <= 0 && currentHints.Count <= 0)
+            {
+                SetAndSpawnHints();
+            }
         }
-    
+    }
+
+    private void ResetHintTimer()
+    {
+        hintDelay = s_hintDelayMax;
     }
 
     private void SetAndSpawnHints()
     {
         foreach(GameObject hint in deadlock.possibleCombo)
         {
-            GameObject tempHintParticles = Instantiate(s_HintParticle, hint.transform.position, Quaternion.identity);
-            currentHints.Add(tempHintParticles);
-            print(tempHintParticles);
+            if (hint)
+            {
+                GameObject tempHintParticles = Instantiate(s_HintParticle, hint.transform.position, Quaternion.identity);
+                currentHints.Add(tempHintParticles);
+            }
         }
     }
 
     public void DestroyHints()
     {
-
         if(currentHints.Count > 0)
         {
             foreach(GameObject hint in currentHints)
             {
-                Destroy(hint);
-                hintDelaySeconds = s_hintDelay;
+                    Destroy(hint);
             }
+
 
             currentHints.Clear();
         }
+
+        ResetHintTimer();
     }
 
 }

@@ -18,6 +18,10 @@ namespace Assets.Scripts.Helpers
         public static string CharGameTile = "CharGameTile";
         public static string GameBoard = "GameBoard";
         public static string AvatarIcon = "T_AvatarIcon";
+        public static string Collection = "Tiles Lefts";
+        public static string TimeAttack = "Tiles Collected";
+        public static string Moves = "Moves";
+        public static string Time = "Time";
         
 
         public static string FindTileType(TileType tileType, GameTileType gameTile)
@@ -71,4 +75,11 @@ public enum PlayerState
 {
     Wait,
     Active
+}
+
+public enum GameMode
+{
+    Collection,
+    TimeAttack,
+    Deadlocked
 }
