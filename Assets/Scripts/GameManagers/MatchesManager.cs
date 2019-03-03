@@ -9,11 +9,21 @@ public class MatchesManager : MonoBehaviour
     private GameBoard gameBoard;
     public List<GameObject> currentMatches = new List<GameObject>();
     public bool isMatching = false;
+    private AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
     {
         gameBoard = FindObjectOfType<GameBoard>();
+
+        audioSource = GetComponent<AudioSource>();
+
+        ToggleSound();
+    }
+
+    public void ToggleSound()
+    {
+        audioSource.enabled = Utilities.IsSoundActive;
     }
 
     public void CheckForMatches()
@@ -31,9 +41,9 @@ public class MatchesManager : MonoBehaviour
                 tempTile.GetComponent<GameTileBase>().SetHasMatched(true);
             }
         }
-        
-    }
 
+        audioSource.Play();
+    }
 
 
     public void DestoryMatch()

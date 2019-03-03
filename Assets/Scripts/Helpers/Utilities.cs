@@ -8,6 +8,12 @@ namespace Assets.Scripts.Helpers
 
     public static class Utilities
     {
+        public static GameMode GameMode = GameMode.Collection;
+        public static bool IsSoundActive = true;
+        public static bool IsMusicActive = true;
+        public static bool IsGamePaused = false;
+ 
+
         public static string Resources = "Resources";
         public static string Prefabs = "Prefabs";
         public static string PF = "PF_";
@@ -22,7 +28,10 @@ namespace Assets.Scripts.Helpers
         public static string TimeAttack = "Tiles Collected";
         public static string Moves = "Moves";
         public static string Time = "Time";
-        
+        public static string GameLevel = "SC_Game";
+        public static string StartMenu = "SC_StartMenu";
+        public static string Music = "Music";
+
 
         public static string FindTileType(TileType tileType, GameTileType gameTile)
         {
@@ -82,4 +91,15 @@ public enum GameMode
     Collection,
     TimeAttack,
     Deadlocked
+}
+
+public enum ButtonType
+{
+    Play,
+    Help,
+    Exit,
+    Collection,
+    TimeAttack,
+    Deadlocked,
+    GoBack,
 }

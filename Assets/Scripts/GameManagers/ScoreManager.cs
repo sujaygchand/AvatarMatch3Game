@@ -7,8 +7,10 @@ using Assets.Scripts.Helpers;
 public class ScoreManager : MonoBehaviour
 {
     private GameBoard gameBoard;
-    public int tilesToCollect;
+    public int tilesToCollect = 50;
     private int tiles;
+    public int moves = 14;
+    
     public GameMode gameMode;
     public Text scoreText;
     public Text scoreInfoText;
@@ -19,6 +21,8 @@ public class ScoreManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        gameMode = Utilities.GameMode;
+
         gameBoard = FindObjectOfType<GameBoard>();
 
         SetupScoreManager();
@@ -27,7 +31,9 @@ public class ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scoreText.text = " " + tiles;
+        
+        scoreText.text = "" + tiles;
+        movesOrTimerText.text = "" + moves;
 
         GameOverCheck();
     }
@@ -96,6 +102,17 @@ public class ScoreManager : MonoBehaviour
                 print("All tiles collected");
             }
         }
+    }
 
+    public void AddToMoves(int deltaMove)
+    {
+        if(gameMode == GameMode.Collection)
+        {
+            moves -= deltaMove;
+        }
+        else if(gameMode == GameMode.Deadlocked)
+        {
+            moves += deltaMove;
+        }
     }
 }

@@ -123,7 +123,7 @@ public class GameTileBase : MonoBehaviour
     protected virtual void OnMouseDown()
     {
         
-        if (gameBoard.currentPlayerState == PlayerState.Active)
+        if (gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
         {
             hintManager.DestroyHints();
             initialTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -133,7 +133,7 @@ public class GameTileBase : MonoBehaviour
 
     protected virtual void OnMouseUp()
     {
-        if(gameBoard.currentPlayerState == PlayerState.Active)
+        if(gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
         {
             finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             CalculateAngle();

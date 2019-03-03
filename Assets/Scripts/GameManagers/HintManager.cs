@@ -52,6 +52,7 @@ public class HintManager : MonoBehaviour
         }
     }
 
+
     public void DestroyHints()
     {
         if(currentHints.Count > 0)
