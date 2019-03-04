@@ -19,9 +19,8 @@ public class GameBoard : MonoBehaviour
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
     private GridTitle[,] gameGrid;
-    private float destructionWaitTime = 0.75f;
+    private float destructionWaitTime = 0.6f;
     private bool isRefiliing = false;
-    private bool ischecking = true;
     private bool doOnce = true;
 
 
@@ -279,7 +278,9 @@ public class GameBoard : MonoBehaviour
 
     public void DestroyMatches()
     {
-        ischecking = true;
+        matchesManager.MakeSpecialTileCheck();
+
+        //matchesManager.currentMatches.Clear();
 
         for (int i = 0; i < width; i++)
         {
@@ -292,7 +293,6 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        matchesManager.currentMatches.Clear();
         StartCoroutine(CollapseRow_Cor());
     }
 
@@ -301,7 +301,7 @@ public class GameBoard : MonoBehaviour
         if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
         {
             currentPlayerState = PlayerState.Wait;
-            matchesManager.MakeSpecialTileCheck();
+            //matchesManager.MakeSpecialTileCheck();
 
             // Causing match bug
             //matchesManager.currentMatches.Remove(allGameTiles[col, row]);
@@ -313,7 +313,7 @@ public class GameBoard : MonoBehaviour
 
     }
 
-    private IEnumerator CollapseRow_Cor()
+    private IEnumerator CollapseRow_Cor1()
     {
         //yield return new WaitForSeconds(destructionWaitTime - .15f);
 
@@ -336,8 +336,33 @@ public class GameBoard : MonoBehaviour
         }
         yield return new WaitForSeconds(destructionWaitTime/2);
 
-        isRefiliing = true;
+        StartCoroutine(RefillBoard_cor());
+    }
 
+    private IEnumerator CollapseRow_Cor()
+    {
+        for(int i = 0; i < width; i++)
+        {
+            for(int j = 0; j < height; j++)
+            {
+                if(!allGameTiles[i, j])
+                {
+                    for (int rowAbove = j + 1; rowAbove < height; rowAbove++)
+                    {
+                        if(allGameTiles[i, rowAbove])
+                        {
+                            allGameTiles[i, rowAbove].GetComponent<GameTileBase>().currentRow = j;
+                            allGameTiles[i, rowAbove] = null;
+
+                            break;
+                        } 
+
+                    }
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(destructionWaitTime / 2);
         StartCoroutine(RefillBoard_cor());
     }
 
@@ -354,7 +379,6 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        isRefiliing = false;
     }
 
     private bool CheckForMatches()
@@ -389,34 +413,11 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
-    private void AdditionalMatchCheck()
-    {
-        if (ischecking)
-        {
-            ischecking = false;
-            currentPlayerState = PlayerState.Wait;
-
-            foreach (GameObject tile in allGameTiles)
-            {
-                if (tile)
-                {
-                    if (tile.GetComponent<GameTileBase>().GetHasMatched())
-                    {
-                        tile.GetComponent<GameTileBase>().additonalCheck = true;
-                    }
-                }
-            }
-        }
-    }
-
-    //private bool Check
-
     
     private IEnumerator RefillBoard_cor()
     {
         RefillBorad();
 
-        //yield return new WaitUntil(() => CheckForEmptySlots() == false);
         yield return new WaitForSeconds(destructionWaitTime);
 
         while (CheckForMatches())
@@ -433,6 +434,7 @@ public class GameBoard : MonoBehaviour
         deadlock.FixDeadLock();
         yield return new WaitForSeconds(destructionWaitTime);
 
+        print("here");
         currentPlayerState = PlayerState.Active;
     }
 }

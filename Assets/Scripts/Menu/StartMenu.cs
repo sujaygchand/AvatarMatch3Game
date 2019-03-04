@@ -12,6 +12,7 @@ public class StartMenu : MonoBehaviour
 
     [SerializeField] GameObject s_MainMenu;
     [SerializeField] GameObject s_PlayMenu;
+    [SerializeField] GameObject s_HelpMenu;
 
     private void Start()
     {
@@ -21,6 +22,8 @@ public class StartMenu : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.clip = pressedSound;
         ToggleSound();
+        s_HelpMenu.SetActive(false);
+        s_PlayMenu.SetActive(false);
     }
 
     public void ToggleSound()
@@ -47,7 +50,18 @@ public class StartMenu : MonoBehaviour
         Utilities.IsGamePaused = false;
         PlaySound();
         s_PlayMenu.SetActive(false);
+        s_HelpMenu.SetActive(false);
         s_MainMenu.SetActive(true);
+    }
+
+    public void HelpPressed()
+    {
+        Utilities.IsGamePaused = false;
+        PlaySound();
+        s_MainMenu.SetActive(false);
+        s_PlayMenu.SetActive(false);
+        s_HelpMenu.SetActive(true);
+        
     }
 
     public void ExitPressed()

@@ -53,7 +53,7 @@ public class MatchesManager : MonoBehaviour
 
     private IEnumerator CheckForMatches_Cor()
     {
-        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime()/2);
+        //yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() / 2);
 
         if (gameBoard)
         {
@@ -121,6 +121,9 @@ public class MatchesManager : MonoBehaviour
                 }
             }
         }
+
+        yield return null;
+
     }
 
     private GameObject[] GetTestingTiles(int col, int row, int colIncrement, int rowIncrement)
@@ -203,6 +206,7 @@ public class MatchesManager : MonoBehaviour
 
     public void MakeSpecialTileCheck()
     {
+
         // Check if move was made
         if (gameBoard.currentTile)
         {
@@ -226,19 +230,19 @@ public class MatchesManager : MonoBehaviour
                 if (CheckMatchAlignment(5))
                 {
                     MakeAvatarTile();
-                    print("Make Avatar");
 
                 }
                 else
                 {
                     MakeGliderTile();
-                    print("Make Glide");
                 }
                 
             }
             
         }
-        
+
+        currentMatches.Clear();
+
     }
 
 
@@ -247,9 +251,11 @@ public class MatchesManager : MonoBehaviour
         // Make bomb
         if (gameBoard.currentTile.GetHasMatched())
         {
+
             gameBoard.currentTile.SetHasMatched(false);
 
             gameBoard.currentTile.GetComponent<GameTileBase>().GenerateCharTile(isRow);
+
         }
         
         else if(gameBoard.currentTile.GetOtherTile())
@@ -258,11 +264,14 @@ public class MatchesManager : MonoBehaviour
 
             if (otherTile.GetHasMatched())
             {
+
                 otherTile.SetHasMatched(false);
 
                 otherTile.GenerateCharTile(isRow);
             }
         }
+
+
     }
 
 
@@ -270,6 +279,7 @@ public class MatchesManager : MonoBehaviour
     {
         if (gameBoard.currentTile.GetHasMatched())
         {
+
             gameBoard.currentTile.SetHasMatched(false);
 
             gameBoard.currentTile.GetComponent<GameTileBase>().GenerateGliderTile();
@@ -278,8 +288,11 @@ public class MatchesManager : MonoBehaviour
         {
             GameTileBase otherTile = gameBoard.currentTile.GetOtherTile().GetComponent<GameTileBase>();
 
+
+
             if (otherTile.GetHasMatched())
             {
+
                 otherTile.SetHasMatched(false);
 
                 otherTile.GenerateGliderTile();
@@ -296,6 +309,7 @@ public class MatchesManager : MonoBehaviour
 
         if (gameBoard.currentTile.GetHasMatched())
         {
+
             gameBoard.currentTile.SetHasMatched(false);
             gameBoard.currentTile.GetComponent<GameTileBase>().GenerateAvatarTile();
 

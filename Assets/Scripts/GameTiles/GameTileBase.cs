@@ -24,17 +24,17 @@ public class GameTileBase : MonoBehaviour
     [SerializeField] private GameObject arrowMask;
     [SerializeField] private GameObject gliderMask;
 
-    [SerializeField]  protected SpriteRenderer tileImage;
-    protected GameObject otherTile;
-    [SerializeField] protected GameBoard gameBoard;
+    [SerializeField] private SpriteRenderer tileImage;
+    [SerializeField] private GameBoard gameBoard;
     public GameObject gameGridObject;
-    protected MatchesManager matchesManager;
+    private GameObject otherTile;
+    private MatchesManager matchesManager;
     private HintManager hintManager;
     private ScoreManager scoreManager;
 
-    protected Vector2 initialTouchPosition;
-    protected Vector2 finalTouchPosition;
-    protected Vector2 targetPosition;
+    private Vector2 initialTouchPosition;
+    private Vector2 finalTouchPosition;
+    private Vector2 targetPosition;
     private float swipeLerp = 0.2f;
 
     [Header("Swipe Variables")]
@@ -72,6 +72,9 @@ public class GameTileBase : MonoBehaviour
 
         previousCol = currentCol;
         previousRow = currentRow;
+
+        initialTouchPosition = Vector2.zero;
+        finalTouchPosition = Vector2.zero;
     }
 
     // Update is called once per frame
@@ -93,9 +96,9 @@ public class GameTileBase : MonoBehaviour
                 if (gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
                 {
                     gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
-
+                    matchesManager.CheckForMatches();
                 }
-                matchesManager.CheckForMatches();
+                
             }
             else
             {
@@ -122,10 +125,14 @@ public class GameTileBase : MonoBehaviour
 
     protected virtual void OnMouseDown()
     {
-        
-        if (gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
+        if (hintManager)
         {
             hintManager.DestroyHints();
+        }
+
+        if (gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
+        {
+            
             initialTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             //print(initialTouchPosition);
         }
