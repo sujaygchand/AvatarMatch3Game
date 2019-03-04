@@ -7,12 +7,14 @@ using Assets.Scripts.Helpers;
 public class ScoreManager : MonoBehaviour
 {
     private GameBoard gameBoard;
+    private GameOverManager gameOverManager;
     public int tilesToCollect = 50;
     private int tiles;
     public int moves = 14;
     public int timeLimt = 60;
     private float currentTime;
     private int displayTime;
+    private bool isGameOver = false;
     
     public GameMode gameMode;
     public Text scoreText;
@@ -28,17 +30,21 @@ public class ScoreManager : MonoBehaviour
 
         gameBoard = FindObjectOfType<GameBoard>();
 
+        gameOverManager = FindObjectOfType<GameOverManager>();
+
         SetupScoreManager();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-        scoreText.text = "" + tiles;
-        
+        if (!isGameOver)
+        {
+            scoreText.text = "" + tiles;
 
-        GameOverCheck();
+
+            GameOverCheck();
+        }
     }
 
     private void SetupScoreManager()
@@ -111,6 +117,8 @@ public class ScoreManager : MonoBehaviour
             if (currentTime <= 0)
             {
                 print("Time Attacked");
+                gameOverManager.RenderGameOverScreen(true);
+                isGameOver = true;
             }
 
 
@@ -118,15 +126,19 @@ public class ScoreManager : MonoBehaviour
         {
             movesOrTimerText.text = "" + moves;
 
-            if(moves <= 0)
-            {
-                return;
-            }
-
                 if (tiles <= 0)
                 {
                     print("All tiles collected");
-                }
+                    gameOverManager.RenderGameOverScreen(true);
+                    isGameOver = true;
+            }
+
+            else if (moves <= 0 && tiles > 0)
+            {
+                print("All tiles collected");
+                gameOverManager.RenderGameOverScreen(false);
+                isGameOver = true;
+            }
             }
         }
 

@@ -1,0 +1,40 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using Assets.Scripts.Helpers;
+
+public class GameOverManager : MonoBehaviour
+{
+    [SerializeField] private Text s_GameOverText;
+    [SerializeField] private GameObject s_GameOver;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        s_GameOver.SetActive(false);
+    }
+
+    public void RenderGameOverScreen(bool hasWon)
+    {
+        Utilities.IsGamePaused = true;
+        s_GameOver.SetActive(true);
+
+        if (Utilities.GameMode == GameMode.Collection)
+        {
+            if (hasWon)
+            {
+                s_GameOverText.text = "YOU WON";
+            }
+            else
+            {
+                s_GameOverText.text = "TRY AGAIN";
+            }
+        }
+        else
+        {
+            s_GameOverText.text = "PLAY AGAIN?";
+        }
+    }
+
+}

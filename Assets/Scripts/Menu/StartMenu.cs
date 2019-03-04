@@ -15,6 +15,7 @@ public class StartMenu : MonoBehaviour
 
     private void Start()
     {
+        Utilities.IsGamePaused = false;
         audioSource = GetComponent<AudioSource>();
 
         audioSource.playOnAwake = false;
@@ -34,6 +35,7 @@ public class StartMenu : MonoBehaviour
 
     public void PlayPressed()
     {
+        Utilities.IsGamePaused = false;
         PlaySound();
         s_MainMenu.SetActive(false);
         s_PlayMenu.SetActive(true);
@@ -42,6 +44,7 @@ public class StartMenu : MonoBehaviour
 
     public void GoBackPressed()
     {
+        Utilities.IsGamePaused = false;
         PlaySound();
         s_PlayMenu.SetActive(false);
         s_MainMenu.SetActive(true);

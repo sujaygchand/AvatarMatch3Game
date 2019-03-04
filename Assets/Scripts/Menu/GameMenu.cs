@@ -10,6 +10,7 @@ public class GameMenu : MonoBehaviour
 {
     public AudioClip pressedSound;
     [SerializeField] GameObject s_PauseMenu;
+    [SerializeField] GameObject s_QuitMenu;
     [SerializeField] GameObject s_MusicButton;
     [SerializeField] GameObject s_SoundButton;
     private AudioSource audioSource;
@@ -19,6 +20,7 @@ public class GameMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Utilities.IsGamePaused = false;
         audioSource = GetComponent<AudioSource>();
         gameBoard = FindObjectOfType<GameBoard>();
 
@@ -43,12 +45,14 @@ public class GameMenu : MonoBehaviour
 
 public void RestartLevel()
 {
+    Utilities.IsGamePaused = false;
     PlaySound();
     SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }
 
     public void MainMenu()
     {
+        Utilities.IsGamePaused = false;
         PlaySound();
         SceneManager.LoadScene(Utilities.StartMenu);
     }
@@ -129,6 +133,20 @@ public void RestartLevel()
             music.ToggleMusic();
         }
 
+    }
+
+    public void OpenQuitMenu()
+    {
+        s_PauseMenu.SetActive(false);
+
+        s_QuitMenu.SetActive(true);
+    }
+
+    public void CloseQuitMenu()
+    {
+        s_QuitMenu.SetActive(false);
+
+        TogglePause();
     }
 
     private void CheckMuted()

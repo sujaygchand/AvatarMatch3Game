@@ -420,6 +420,14 @@ public class GameTileBase : MonoBehaviour
             }
             else
             {
+                if (scoreManager)
+                {
+                    if(Utilities.GameMode == GameMode.Collection)
+                    {
+                        scoreManager.moves--;
+                    }
+                }
+
                 gameBoard.DestroyMatches();
                 
             }
