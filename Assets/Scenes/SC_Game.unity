@@ -1970,7 +1970,7 @@ PrefabInstance:
     - target: {fileID: 174228109964221906, guid: 5103f760aa191df4da22216f64c72541,
         type: 3}
       propertyPath: tilesToCollect
-      value: 50
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 174228109964221906, guid: 5103f760aa191df4da22216f64c72541,
         type: 3}
@@ -2000,7 +2000,12 @@ PrefabInstance:
     - target: {fileID: 174228109964221906, guid: 5103f760aa191df4da22216f64c72541,
         type: 3}
       propertyPath: moves
-      value: 14
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 174228109964221906, guid: 5103f760aa191df4da22216f64c72541,
+        type: 3}
+      propertyPath: timeLimt
+      value: 61
       objectReference: {fileID: 0}
     - target: {fileID: 174228109964221905, guid: 5103f760aa191df4da22216f64c72541,
         type: 3}

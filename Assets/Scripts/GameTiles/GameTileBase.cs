@@ -152,7 +152,17 @@ public class GameTileBase : MonoBehaviour
 
         if (Input.GetMouseButtonDown(2))
         {
-            SetGameTileType(GameTileType.Earth);
+            GenerateGliderTile();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            GenerateCharTile(true);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            GenerateAvatarTile();
         }
     }
 
@@ -321,7 +331,7 @@ public class GameTileBase : MonoBehaviour
             scoreManager.AddToScore(+1);
         }
 
-        yield return new WaitForSeconds(waitTime - .3f);
+        yield return new WaitForSeconds(waitTime);
 
         Destroy(gameObject);
         
@@ -393,7 +403,7 @@ public class GameTileBase : MonoBehaviour
             otherTile.GetComponent<GameTileBase>().SetHasMatched(true);
         }
 
-        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - .15f);
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
         if (otherTile)
         {
 

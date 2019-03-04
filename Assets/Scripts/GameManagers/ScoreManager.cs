@@ -10,6 +10,9 @@ public class ScoreManager : MonoBehaviour
     public int tilesToCollect = 50;
     private int tiles;
     public int moves = 14;
+    public int timeLimt = 60;
+    private float currentTime;
+    private int displayTime;
     
     public GameMode gameMode;
     public Text scoreText;
@@ -33,7 +36,7 @@ public class ScoreManager : MonoBehaviour
     {
         
         scoreText.text = "" + tiles;
-        movesOrTimerText.text = "" + moves;
+        
 
         GameOverCheck();
     }
@@ -41,6 +44,7 @@ public class ScoreManager : MonoBehaviour
     private void SetupScoreManager()
     {
         ResetScore();
+        ResetTime();
 
         switch (gameMode)
         {
@@ -74,6 +78,14 @@ public class ScoreManager : MonoBehaviour
 
     }
 
+    public void ResetTime()
+    {
+        if(gameMode == GameMode.TimeAttack)
+        {
+            currentTime = timeLimt;
+        }
+    }
+
     public void AddToScore(int deltaScore)
     {
         if(tiles + deltaScore <= 0 )
@@ -89,20 +101,34 @@ public class ScoreManager : MonoBehaviour
     {
         if (gameMode == GameMode.TimeAttack)
         {
-            if (tiles > 20)
+            if (gameBoard.currentPlayerState == PlayerState.Active && currentTime > 0)
+            {
+                currentTime -= Time.deltaTime;
+
+                movesOrTimerText.text = "" + (int)currentTime;
+            }
+
+            if (currentTime <= 0)
             {
                 print("Time Attacked");
             }
 
 
-        } else
+        } else if(gameMode == GameMode.Collection)
         {
-            if(tiles <= 0)
+            movesOrTimerText.text = "" + moves;
+
+            if(moves <= 0)
             {
-                print("All tiles collected");
+                return;
+            }
+
+                if (tiles <= 0)
+                {
+                    print("All tiles collected");
+                }
             }
         }
-    }
 
     public void AddToMoves(int deltaMove)
     {

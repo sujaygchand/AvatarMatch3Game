@@ -55,7 +55,7 @@ public class Deadlock : MonoBehaviour
 
                 int maxLoops = 0;
 
-                while (gameBoard.CheckSetUpMatch(i, j, newTilesCollection[newIndex], tempGameTileType) && maxLoops < 25){
+                while (gameBoard.CheckSetUpMatch(i, j, tempGameTileType) && maxLoops < 25){
 
                     newIndex = Random.Range(0, newTilesCollection.Count);
                     maxLoops++;
@@ -211,7 +211,7 @@ private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
     if (testValue < testLimit)
     {
         // null pointer check
-        if (gameBoard.allGameTiles[tempCol1, tempRow1] &&
+        if (gameBoard.allGameTiles[col, row] && gameBoard.allGameTiles[tempCol1, tempRow1] &&
             gameBoard.allGameTiles[tempCol2, tempRow2])
         {
             GameTileBase currentTile = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>();

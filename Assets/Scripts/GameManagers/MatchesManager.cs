@@ -53,7 +53,7 @@ public class MatchesManager : MonoBehaviour
 
     private IEnumerator CheckForMatches_Cor()
     {
-        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime() - 0.25f);
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime()/2);
 
         if (gameBoard)
         {
@@ -328,6 +328,22 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
+        private void MatchCharTile(GameObject tile)
+        {
+
+        if (tile)
+        {
+            if(tile.GetComponent<GameTileBase>().isRowChar){
+                currentMatches.Union(GetRowMatches(tile.GetComponent<GameTileBase>().currentRow));
+            }
+
+            else if (tile.GetComponent<GameTileBase>().isColChar)
+            {
+                currentMatches.Union(GetColMatches(tile.GetComponent<GameTileBase>().currentCol));
+            }
+        }
+        }
+
     private void MatchGliderTile(GameObject[] tiles)
     {
         foreach(GameObject tile in tiles)
@@ -344,10 +360,25 @@ public class MatchesManager : MonoBehaviour
         }
     }
 
+    private void MatchGliderTile(GameObject tile)
+    {
+        if (tile)
+        {
+            if (tile.GetComponent<GameTileBase>())
+            {
+                GameTileBase tempTile = tile.GetComponent<GameTileBase>();
+
+                if (tempTile.GetTileType() == TileType.Glider)
+                {
+                    currentMatches.Union(GetGliderMatches(tempTile.currentCol, tempTile.currentRow));
+                }
+            }
+        }
+    }
 
     public void MatchAvatarTile(GameObject tile)
     {
-        GameTileType testTileType = tile.GetComponent<GameTileBase>().GetGameTileType();
+        GameTileType tempTileType = tile.GetComponent<GameTileBase>().GetGameTileType();
 
         for (int i = 0; i < gameBoard.width; i++)
         {
@@ -355,14 +386,24 @@ public class MatchesManager : MonoBehaviour
             {
                 if (gameBoard.allGameTiles[i, j])
                 {
+                    GameTileBase tempTile = gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>();
+
                     if (tile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
                     {
-                        gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
+                        tempTile.SetHasMatched(true);
                     }
 
-                    else if (gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetGameTileType() == testTileType)
+                    else if (gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().GetGameTileType() == tempTileType)
                     {
-                        gameBoard.allGameTiles[i, j].GetComponent<GameTileBase>().SetHasMatched(true);
+                        if(tempTile.GetTileType() == TileType.Char)
+                        {
+                            MatchCharTile(tempTile.gameObject);
+                        }
+                        else if(tempTile.GetTileType() == TileType.Glider)
+                        {
+                            MatchGliderTile(tempTile.gameObject);
+                        }
+                            tempTile.SetHasMatched(true);
                     }
                 }
             }
@@ -388,9 +429,34 @@ public class MatchesManager : MonoBehaviour
     {
         List<GameObject> tiles = new List<GameObject>();
 
-        for(int i = col - 1; i <= col + 1; i++)
+        int minCol = col;
+        int maxCol = col;
+        int minRow = row;
+        int maxRow = row; 
+
+        if(col > 0)
         {
-            for(int j = row - 1; j <= row + 1; j++)
+            minCol = col - 1;
+        }
+
+        if(col < gameBoard.width - 1)
+        {
+            maxCol = col + 1;
+        }
+
+        if (row > 0)
+        {
+            minRow = row - 1;
+        }
+
+        if (row < gameBoard.height - 1)
+        {
+            maxRow = row + 1;
+        }
+
+        for (int i = minCol; i <= maxCol + 1; i++)
+        {
+            for(int j = minRow; j <= maxRow + 1; j++)
             {
                 // Check if the piece is inside the board
                 if(i >= 0 && i < gameBoard.width && j >= 0 && j < gameBoard.height) { 
