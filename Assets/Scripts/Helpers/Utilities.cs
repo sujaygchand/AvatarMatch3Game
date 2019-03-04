@@ -39,12 +39,13 @@ namespace Assets.Scripts.Helpers
         public static string StartMenu = "SC_StartMenu";
         public static string Music = "Music";
 
-
+        // Helps makes string path to tile image
         public static string FindTileType(TileType tileType, GameTileType gameTile)
         {
             return string.Format("{0}/T_Avatar{1}Icon{0}", tileType, gameTile);
         }
 
+        // Massive number of tiles
         public static int NumOfGameTileTypes()
         {
             return Enum.GetNames(typeof(GameTileType)).Length - 1;

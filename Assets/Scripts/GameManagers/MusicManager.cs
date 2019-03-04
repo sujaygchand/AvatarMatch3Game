@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  This class is used to reference music
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Helpers;
@@ -17,6 +24,7 @@ public class MusicManager : MonoBehaviour
         ToggleMusic();
     }
 
+    // Turn music on and off 
     public void ToggleMusic()
     {
         audioSource.enabled = Utilities.IsMusicActive;

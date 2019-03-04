@@ -12,6 +12,7 @@ using Assets.Scripts.Helpers;
 
 public class GameBoard : MonoBehaviour
 {
+
     [Header("Game Board variables")]
     public PlayerState currentPlayerState;
     public int width;
@@ -22,10 +23,12 @@ public class GameBoard : MonoBehaviour
     private MatchesManager matchesManager;
     private Deadlock deadlock;
 
+    // Tile prefabs
     [SerializeField] GameObject s_GridTile;
     [SerializeField] GameObject s_GameTile;
-    [SerializeField] private GameObject gameGridObject;
-    //private GridTitle[,] gameGrid;
+
+ 
+    [SerializeField] private GameObject gameGridObject;             // A grid to help organise assets, when debuging 
     private float destructionWaitTime = 0.6f;
     private bool isRefiliing = false;
     private bool doOnce = true;
@@ -34,8 +37,10 @@ public class GameBoard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Start game active
         currentPlayerState = PlayerState.Active;
 
+        // If no tile count is set, use maximum ammount  
         if (NumOfTileTypes == 0 || NumOfTileTypes > Utilities.NumOfGameTileTypes())
         {
             NumOfTileTypes = Utilities.NumOfGameTileTypes();
@@ -62,10 +67,7 @@ public class GameBoard : MonoBehaviour
             DrawBoard();
         }
 
-        //gameGridObject = this.gameObject;
-
-        //gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
-
+        // Sets game managers 
         matchesManager = FindObjectOfType<MatchesManager>();
         deadlock = FindObjectOfType<Deadlock>();
 
@@ -73,38 +75,14 @@ public class GameBoard : MonoBehaviour
 
     void Update()
     {
+        // Does a deadlock check after game is ready
         if (doOnce)
         {
             doOnce = false;
             deadlock.FixDeadLock();
         }
-
-        /*
-        if (ischecking)
-        {
-            if (CheckBoardFilled())
-            {
-                ischecking = false;
-            }
-        } 
-        */
     }
 
-    private bool CheckBoardFilled()
-    {
-        for(int i = 0; i < width; i++)
-        {
-            for(int j = 0; j < height; j++)
-            {
-                if(allGameTiles[i, j] == null)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
 
     /*
      * Draws the background tiles for a sizeable game board 
@@ -131,18 +109,26 @@ public class GameBoard : MonoBehaviour
     /*
      * Spawns a tile
      * 
-     * @param 
+     * @param tileObject - prefab to spawn
+     * @param name - for readabilty
+     * @param x - column
+     * @param y - row
+     * @param returnObject - should return GameObject?
+     * 
+     * @return GameObject
      */
     public GameObject SpawnTile(GameObject tileObject, string name, int x, int y, bool returnObject)
     {
         // Offest spawn location by the gameboard location
         Vector2 tempCoord = new Vector2(gameObject.transform.position.x + x, gameObject.transform.position.y + y);
 
+        //First random type
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
+        // Sets type and checks for no initial match on start
         if (returnObject)
         {
-            int maxLoops = 0;
+            int maxLoops = 0;                   // To stop infinite loops 
 
             while (CheckSetUpMatch(x, y, tempTileType) && maxLoops < 25)
             {
@@ -153,6 +139,7 @@ public class GameBoard : MonoBehaviour
 
         }
 
+        // Spawns tile in scene
         GameObject tempTile = Instantiate(tileObject, tempCoord, Quaternion.identity, gameGridObject.transform);
 
         if (tempTile.GetComponent<GameTileBase>())
@@ -177,6 +164,12 @@ public class GameBoard : MonoBehaviour
 
     }
 
+    /*
+     *  Spawns game tile, when refilling board
+     *  
+     *  @param x - column
+     *  @param y - row
+     */
     private void RefillGameTileSpawn(int x, int y)
     {
         if(allGameTiles[x, y])
@@ -184,15 +177,18 @@ public class GameBoard : MonoBehaviour
             return;
         }
 
+        // Spawn location, so tiles slide in
         Vector2 tempCoord = new Vector2(x, y);
         tempCoord.x += Utilities.ColumnOffset;
         tempCoord.y += Utilities.RowOffset + 1.5f;
 
+        //First random type 
         GameTileType tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
 
-        
-        int maxLoops = 0;
+        // Sets type and checks for no initial match on start
+        int maxLoops = 0;                       // Stops infinite loop
 
+        // Ensures no match on slide in
         while (CheckSetUpMatch(x, y, tempTileType) && maxLoops < 25)
         {
             tempTileType = (GameTileType)Random.Range(0, NumOfTileTypes);
@@ -200,6 +196,7 @@ public class GameBoard : MonoBehaviour
             maxLoops++;
         } 
 
+        // Spawns tile
         GameObject tempTile = Instantiate(s_GameTile, tempCoord, Quaternion.identity, gameGridObject.transform);
 
         if (tempTile.GetComponent<GameTileBase>())
@@ -216,10 +213,18 @@ public class GameBoard : MonoBehaviour
         allGameTiles[x, y] = tempTile;
     }
 
+    /*
+     * Ensures no match, when tiles are spawned
+     * 
+     * @param col
+     * @param row
+     * @param tileType
+     * 
+     */ 
     public bool CheckSetUpMatch(int col, int row, GameTileType tileType)
     {
 
-        // Quick method to check when the thrid col/row are tested
+        // Quick method to check when the col/row  after third are tested
         if (col > 1 && row > 1)
         {
             // Horizontal check
@@ -242,7 +247,7 @@ public class GameBoard : MonoBehaviour
 
         }
 
-        // 
+        // Checks early edge tiles 
         else if (col <= 1 || row <= 1)
         {
             if (row > 1)
@@ -278,11 +283,17 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
+    /*
+     * Getter for destruction time
+     */ 
     public float GetDestructionWaitTime()
     {
         return destructionWaitTime;
     }
 
+    /*
+     * Destroyes match and makes special tiles 
+     */ 
     public void DestroyMatches()
     {
         matchesManager.MakeSpecialTileCheck();
@@ -300,9 +311,11 @@ public class GameBoard : MonoBehaviour
             }
         }
 
+        // Start collapsing the rows
         StartCoroutine(CollapseRow_Cor());
     }
 
+    // Destory individual match
     private void DestroyMatch(int col, int row)
     {
         if (allGameTiles[col, row].GetComponent<GameTileBase>().GetHasMatched())
@@ -320,42 +333,22 @@ public class GameBoard : MonoBehaviour
 
     }
 
-    private IEnumerator CollapseRow_Cor1()
-    {
-        //yield return new WaitForSeconds(destructionWaitTime - .15f);
-
-        for (int i = 0; i < width; i++)
-        {
-            int emptyslots = 0;
-
-            for (int j = 0; j < height; j++)
-            {
-                if (allGameTiles[i, j] == null)
-                {
-                    emptyslots++;
-                }
-                else if (emptyslots > 0)
-                {
-                    allGameTiles[i, j].GetComponent<GameTileBase>().currentRow -= emptyslots;
-                    allGameTiles[i, j] = null;
-                }
-            }
-        }
-        yield return new WaitForSeconds(destructionWaitTime/2);
-
-        StartCoroutine(RefillBoard_cor());
-    }
-
+    /*
+     * Collapes the row coroutine
+     */
     private IEnumerator CollapseRow_Cor()
     {
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
             {
+                // Look for null tile
                 if(!allGameTiles[i, j])
                 {
+                    // Checks tiles above
                     for (int rowAbove = j + 1; rowAbove < height; rowAbove++)
                     {
+                        // Keeps checking until a valid tile is found and drops it to the null row
                         if(allGameTiles[i, rowAbove])
                         {
                             allGameTiles[i, rowAbove].GetComponent<GameTileBase>().currentRow = j;
@@ -370,9 +363,12 @@ public class GameBoard : MonoBehaviour
         }
 
         yield return new WaitForSeconds(destructionWaitTime / 2);
-        StartCoroutine(RefillBoard_cor());
+        StartCoroutine(RefillBoard_cor());                          // start board refill
     }
 
+    /*
+     * Refill game board
+     */ 
     private void RefillBorad()
     {
         for(int i = 0; i < width; i++)
@@ -388,6 +384,9 @@ public class GameBoard : MonoBehaviour
 
     }
 
+    /*
+     * Checks for tile matches
+     */ 
     private bool CheckForMatches()
     {
 
@@ -408,6 +407,9 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
+    /*
+     * Checks if the board has any empty slots
+     */ 
     private bool CheckForEmptySlots()
     {
         foreach(GameObject tile in allGameTiles)
@@ -420,28 +422,31 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
-    
+    /*
+     * Refill board coroutine
+     * 
+     */ 
     private IEnumerator RefillBoard_cor()
     {
-        RefillBorad();
+        RefillBorad();          // Refill board
 
         yield return new WaitForSeconds(destructionWaitTime);
 
+        // Looks for destroys matches
         while (CheckForMatches())
         {
             DestroyMatches();
             yield return new WaitForSeconds(destructionWaitTime * 2);
         }
 
+        // Clears the current match
         matchesManager.currentMatches.Clear();
         currentTile = null;
-        //yield return new WaitForSeconds(destructionWaitTime + 0.7f);
-
-        //yield return new WaitUntil(()=> ischecking == false);
+        
+        // Check for deadlock
         deadlock.FixDeadLock();
         yield return new WaitForSeconds(destructionWaitTime);
 
-        print("here");
         currentPlayerState = PlayerState.Active;
     }
 }
