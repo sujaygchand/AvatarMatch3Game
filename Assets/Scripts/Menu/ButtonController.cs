@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Button sounds
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +33,6 @@ public class ButtonController : MonoBehaviour
     private void PlaySound()
     {
         audioSource.PlayOneShot(pressedSound);
-        print("woop woop");
     }
 
 

@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Deprecated class
+ */
+
 using UnityEngine;
 using Assets.Scripts.Helpers;
 
@@ -12,7 +17,5 @@ public class GridTitle : MonoBehaviour
         //gameTilesParent = GameObject.FindGameObjectWithTag(Utilities.GameTiles);
         
     }
-
-    // Update is called once per frame
 
 }

@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  The main game board class
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Helpers;
@@ -18,7 +25,7 @@ public class GameBoard : MonoBehaviour
     [SerializeField] GameObject s_GridTile;
     [SerializeField] GameObject s_GameTile;
     [SerializeField] private GameObject gameGridObject;
-    private GridTitle[,] gameGrid;
+    //private GridTitle[,] gameGrid;
     private float destructionWaitTime = 0.6f;
     private bool isRefiliing = false;
     private bool doOnce = true;

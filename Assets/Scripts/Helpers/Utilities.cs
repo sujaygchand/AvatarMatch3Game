@@ -1,19 +1,26 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  A static class that hold enums, static values and string values (To avoid mistake, when typing strings)
+ *  
+ */
+
+using System;
+
 
 namespace Assets.Scripts.Helpers
 {
 
     public static class Utilities
     {
+        // Used between scenes and a large amount of objects
         public static GameMode GameMode = GameMode.Collection;
         public static bool IsSoundActive = true;
         public static bool IsMusicActive = true;
         public static bool IsGamePaused = false;
- 
-
+        
+        // String helpers
         public static string Resources = "Resources";
         public static string Prefabs = "Prefabs";
         public static string PF = "PF_";
@@ -43,12 +50,14 @@ namespace Assets.Scripts.Helpers
             return Enum.GetNames(typeof(GameTileType)).Length - 1;
         }
 
+        
         public static float ColumnOffset = 0; //-3.49f;
         public static float RowOffset = 0; //-7.04f;
     }
 
 }
 
+// Stores Game tile types (Decided to use 5 tiles, after testing)
 public enum GameTileType
 {
     Air,
@@ -63,6 +72,10 @@ public enum GameTileType
     None
 }
 
+// Tile types
+// Char = Striped Bomb
+// Glider = Wrapped Candy
+// Avatar = Colour Bomb
 public enum TileType
 {
     Normal,
@@ -71,6 +84,7 @@ public enum TileType
     Avatar
 }
 
+// Swipe direction
 public enum SwipeDirection
 {
     None,
@@ -80,12 +94,14 @@ public enum SwipeDirection
     Left
 }
 
+// Player state
 public enum PlayerState
 {
     Wait,
     Active
 }
 
+// The game modes
 public enum GameMode
 {
     Collection,
@@ -93,13 +109,3 @@ public enum GameMode
     Deadlocked
 }
 
-public enum ButtonType
-{
-    Play,
-    Help,
-    Exit,
-    Collection,
-    TimeAttack,
-    Deadlocked,
-    GoBack,
-}
