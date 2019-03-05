@@ -38,8 +38,8 @@ public class MatchesManager : MonoBehaviour
             if (!currentMatches.Contains(tempTile))
             {
                 currentMatches.Add(tempTile);
-                tempTile.GetComponent<GameTileBase>().SetHasMatched(true);
             }
+            tempTile.GetComponent<GameTileBase>().SetHasMatched(true);
         }
 
         audioSource.Play();

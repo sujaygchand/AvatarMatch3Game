@@ -1,9 +1,16 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Checks if not matches can be made (Deadlocked State) and controls shuffling
+ */
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Deadlock : MonoBehaviour
 {
+    // finds the first possible combo
     public List<GameObject> possibleCombo = new List<GameObject>();
     private GameBoard gameBoard;
     private MatchesManager matchesManager;
@@ -16,23 +23,26 @@ public class Deadlock : MonoBehaviour
     }
 
 
+    /*
+     * Fixes the board if deadlocked
+     */ 
     public void FixDeadLock()
     {
         if (IsGameDeadlocked())
         {
-            print("Deadlocked!!!!");
             ShuffleBoard();
-        } else
-        {
-            print("Up your arsenal");
         }
     }
 
+    /*
+     * Shuffles the board
+     */ 
     private void ShuffleBoard()
     {
         // New collection to store tiles in
         List<GameObject> newTilesCollection = new List<GameObject>();
 
+        // Gets all the pieces on the board
         for(int i = 0; i < gameBoard.width; i++)
         {
             for(int j = 0; j < gameBoard.height; j++)
@@ -51,6 +61,7 @@ public class Deadlock : MonoBehaviour
             {
                 int newIndex = Random.Range(0, newTilesCollection.Count);
 
+                // Use a similiar check to ensure that the board doesn't shuffle into an immediate match
                 GameTileType tempGameTileType = newTilesCollection[newIndex].GetComponent<GameTileBase>().GetGameTileType();
 
                 int maxLoops = 0;
@@ -63,7 +74,7 @@ public class Deadlock : MonoBehaviour
 
                 GameTileBase tileScript = newTilesCollection[newIndex].GetComponent<GameTileBase>();
 
-
+                // Assigns variables to the tiles new position
                 tileScript.currentCol = i;
                 tileScript.currentRow = j;
                 gameBoard.allGameTiles[i, j] = newTilesCollection[newIndex];
@@ -80,15 +91,22 @@ public class Deadlock : MonoBehaviour
             return;
         } else
         {
+            // immediately check for matches
             matchesManager.CheckForMatches();
         }
     }
 
 
 
+    /*
+     * The deadlock check
+     * 
+     * @return a bool
+     */ 
     private bool IsGameDeadlocked()
     {
-
+    
+      // Return false match if no match
       for (int i = 0; i < gameBoard.width; i++)
         {
             for(int j = 0; j < gameBoard.height; j++)
@@ -118,22 +136,38 @@ public class Deadlock : MonoBehaviour
     }
 
 
+    /*
+     * Checks if a match is valid
+     */ 
     private bool CheckForMatchesNeraby(int col, int row, int colIncrement, int rowIncrement)
     {
+        // Move tile to new location
         TileSwap(col, row, colIncrement, rowIncrement);
         if (AreMatchesOnBoard())
         {
+            // Moves tile back, if valid
             TileSwap(col, row, colIncrement, rowIncrement);
             return true;
         }
 
+        // Moves tile back, if not valid
         TileSwap(col, row, colIncrement, rowIncrement);
         return false;
     }
 
 
+    /*
+     * Swaps tile and checks
+     * 
+     * @param col
+     * @param row
+     * @param colIncrement
+     * @param rowIncrement
+     * 
+     */
     private void TileSwap(int col, int row, int colIncrement, int rowIncrement)
     {
+        // New tile location
         int tempCol = col + colIncrement;
         int tempRow = row + rowIncrement;
 
@@ -147,6 +181,9 @@ public class Deadlock : MonoBehaviour
         gameBoard.allGameTiles[col, row] = originalTile;
     }
 
+    /*
+     * Check if matches are on board
+     */ 
     private bool AreMatchesOnBoard()
     {
         for(int i = 0; i < gameBoard.width; i++)
@@ -182,11 +219,21 @@ public class Deadlock : MonoBehaviour
                 }
         return false;
     }
-        
 
 
-private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
+    /*
+     *  Checks for a match the given location
+     *  
+     *  @param col
+     *  @param row
+     *  @param colIncrement
+     *  @param rowIncrement
+     *  
+     *  @return is there match?
+     */
+    private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
 {
+    // Clears the previous possible match
      possibleCombo.Clear();
 
     int tempCol1 = col + colIncrement;
@@ -197,6 +244,7 @@ private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
     int testValue = 0;
     int testLimit = 0;
 
+    // Check for matches left/right
     if (colIncrement > rowIncrement)
     {
         testValue = col;
@@ -204,27 +252,33 @@ private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
     }
     else
     {
+        // Check for matches up/down
         testValue = row;
         testLimit = gameBoard.height - 2;
     }
 
+    // Ensures no check happens outside the board
     if (testValue < testLimit)
     {
         // null pointer check
         if (gameBoard.allGameTiles[col, row] && gameBoard.allGameTiles[tempCol1, tempRow1] &&
             gameBoard.allGameTiles[tempCol2, tempRow2])
         {
+             // Three tiles to compare 
             GameTileBase currentTile = gameBoard.allGameTiles[col, row].GetComponent<GameTileBase>();
             GameTileBase otherTile1 = gameBoard.allGameTiles[tempCol1, tempRow1].GetComponent<GameTileBase>();
             GameTileBase otherTile2 = gameBoard.allGameTiles[tempCol2, tempRow2].GetComponent<GameTileBase>();
-
+            
+            // Checks if all are of same type
             if (currentTile.GetGameTileType() == otherTile1.GetGameTileType() &&
                 currentTile.GetGameTileType() == otherTile2.GetGameTileType())
             {
+                //Debug
                 print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
                 print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
                 print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
 
+                    // Add match to combo
                     GameObject[] combo = { currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject };
                     MakePossibleCombo(combo);
                     return true;
@@ -234,6 +288,11 @@ private bool FindMatchAt(int col, int row, int colIncrement, int rowIncrement)
     return false;
 }
 
+    /* 
+     * Adds to the match List, to assit with hint
+     *
+     * @param tiles - the tiles to add
+     */ 
     private void MakePossibleCombo(GameObject[] tiles)
     {
         possibleCombo.Clear();
