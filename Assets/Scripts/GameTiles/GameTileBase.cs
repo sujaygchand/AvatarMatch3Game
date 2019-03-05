@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Game tile base
+ */
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -7,15 +13,16 @@ using Assets.Scripts.Helpers;
 [RequireComponent(typeof(SpriteRenderer))]
 public class GameTileBase : MonoBehaviour
 {
+
     [Header("Position Variables")]
     public int currentCol;
     public int currentRow;
-    protected int previousCol;
-    protected int previousRow;
+    private int previousCol;
+    private int previousRow;
 
-    [SerializeField] protected GameTileType gameTileType;
-    [SerializeField] protected TileType tileType = TileType.Normal;
-    [SerializeField] protected AnimationCurve animationGraph;
+    [Header("Tile Type Variables")]
+    [SerializeField] private GameTileType gameTileType;
+    [SerializeField] private TileType tileType = TileType.Normal;
 
     [Header("Powerup Variables")]
     [SerializeField] public bool isRowChar = false;
@@ -24,33 +31,36 @@ public class GameTileBase : MonoBehaviour
     [SerializeField] private GameObject arrowMask;
     [SerializeField] private GameObject gliderMask;
 
+    [Header("Swipe Variables")]
+    public float swipeAngle = 0;
+    public float swipeThreshold = .9f;
+
+    [Header("Object Variables")]
     [SerializeField] private SpriteRenderer tileImage;
     [SerializeField] private GameBoard gameBoard;
     public GameObject gameGridObject;
+
+    [SerializeField] private bool hasMatched = false;
+    public bool additonalCheck = false;
+
+    // Managers
     private GameObject otherTile;
     private MatchesManager matchesManager;
     private HintManager hintManager;
     private ScoreManager scoreManager;
 
+    // Input variables
     private Vector2 initialTouchPosition;
     private Vector2 finalTouchPosition;
     private Vector2 targetPosition;
     private float swipeLerp = 0.2f;
 
-    [Header("Swipe Variables")]
-    public float swipeAngle = 0;
-    public float swipeThreshold = .9f;
-
-    [SerializeField] private bool hasMatched = false;
-    public bool additonalCheck = false;
-
+    [Header("Other Variables")]
     public GameObject matchedParent;
     public SwipeDirection swipeDirection = SwipeDirection.None;
-
     private bool doOnce = false;
 
-    // Start is called before the first frame update
-
+    // On Awake
     private void Awake()
     {
         tileImage = GetComponent<SpriteRenderer>();
@@ -58,6 +68,7 @@ public class GameTileBase : MonoBehaviour
         gliderMask.GetComponent<SpriteRenderer>().enabled = false;
     }
 
+    // On start
     void Start()
     {
         tileType = TileType.Normal;
@@ -66,6 +77,7 @@ public class GameTileBase : MonoBehaviour
         gameBoard = GameObject.FindGameObjectWithTag(Utilities.GameBoard).GetComponent<GameBoard>();
         gameGridObject = GameObject.FindGameObjectWithTag(Utilities.Grid);
 
+        // Managers
         matchesManager = FindObjectOfType<MatchesManager>();
         hintManager = FindObjectOfType<HintManager>();
         scoreManager = FindObjectOfType<ScoreManager>();
@@ -80,88 +92,77 @@ public class GameTileBase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //OldFindMatches();
-        //FindMatches();
-
+        // Target position
         targetPosition.x = currentCol + Utilities.ColumnOffset;
         targetPosition.y = currentRow + Utilities.RowOffset;
 
         if (gameBoard)
         {
-
-            if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .05)
+            // moves tile
+            if (Mathf.Abs(targetPosition.magnitude - transform.position.magnitude) > .1)
             {
                 transform.position = Vector2.Lerp(transform.position, targetPosition, swipeLerp);
 
-                if (gameBoard.allGameTiles[currentCol, currentRow] != this.gameObject)
+
+                if (gameBoard.allGameTiles[currentCol, currentRow] != gameObject)
                 {
-                    gameBoard.allGameTiles[currentCol, currentRow] = this.gameObject;
+                    // Sets new tile reference
+                    gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
                     matchesManager.CheckForMatches();
                 }
-                
+
             }
             else
             {
+                // Current position
                 transform.position = targetPosition;
 
                 if (gameBoard.allGameTiles[currentCol, currentRow])
                 {
                     gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
-                    //FindMatches();
                 }
             }
-
-            if (additonalCheck && hasMatched)
-            {
-                additonalCheck = false;
-                matchesManager.CheckForMatches();
-            }
-
         }
-
-
 
     }
 
-    protected virtual void OnMouseDown()
+    /*
+     * On mouse button pressed
+     */ 
+    private void OnMouseDown()
     {
+        // Destroy hint
         if (hintManager)
         {
             hintManager.DestroyHints();
         }
 
+        // Set initial position of input
         if (gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
         {
-            
             initialTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            //print(initialTouchPosition);
         }
     }
 
-    protected virtual void OnMouseUp()
+    /*
+     * On mouse button released
+     */
+    private void OnMouseUp()
     {
-        if(gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
+        // Set final position of input
+        if (gameBoard.currentPlayerState == PlayerState.Active && !Utilities.IsGamePaused)
         {
             finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             CalculateAngle();
-            //FindMatches();
         }
 
     }
 
-    // Debug
+    /*
+     * Debug, make tile
+     */
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            GenerateCharTile(false);
-        }
-
-        if (Input.GetMouseButtonDown(2))
-        {
-            GenerateGliderTile();
-        }
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             GenerateCharTile(true);
@@ -169,10 +170,23 @@ public class GameTileBase : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
+            GenerateCharTile(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            GenerateGliderTile();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
             GenerateAvatarTile();
         }
     }
 
+    /*
+     * Calculate angle for the swipe angle and moves tiles
+     */ 
     private void CalculateAngle()
     {
         // Check against accidental swipes
@@ -184,16 +198,20 @@ public class GameTileBase : MonoBehaviour
             swipeAngle *= 180 / Mathf.PI;
             MoveTiles();
             gameBoard.currentTile = this;
-        } else
+        }
+        else
         {
             gameBoard.currentPlayerState = PlayerState.Active;
         }
 
     }
 
+    /*
+     * Makes the char tile (Striped Bomb)
+     */
     public void GenerateCharTile(bool isRowChar)
     {
-        if(tileType == TileType.Avatar)
+        if (tileType == TileType.Avatar)
         {
             return;
         }
@@ -213,19 +231,24 @@ public class GameTileBase : MonoBehaviour
 
         SetGameTileType(gameTileType);
 
+        // Rotates arrow
         if (!isRowChar)
         {
             arrowMask.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
-        } else
+        }
+        else
         {
             arrowMask.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
         }
 
     }
 
+    /*
+     * Makes Glider tile (Wrapped Candy)
+     */ 
     public void GenerateGliderTile()
     {
-        if(tileType == TileType.Avatar)
+        if (tileType == TileType.Avatar)
         {
             return;
         }
@@ -243,6 +266,9 @@ public class GameTileBase : MonoBehaviour
         gliderMask.GetComponent<SpriteRenderer>().enabled = true;
     }
 
+    /*
+     * Makes Avatar tile (Colour Bomb)
+     */
     public void GenerateAvatarTile()
     {
         isRowChar = false;
@@ -250,7 +276,7 @@ public class GameTileBase : MonoBehaviour
 
         if (arrowMask.GetComponent<SpriteRenderer>().enabled)
         {
-            arrowMask.GetComponent<SpriteRenderer>().enabled = false; 
+            arrowMask.GetComponent<SpriteRenderer>().enabled = false;
         }
 
         gameTileType = GameTileType.None;
@@ -259,7 +285,9 @@ public class GameTileBase : MonoBehaviour
         SetGameTileType(gameTileType);
     }
 
-
+    /*
+     * Moves tile
+     */ 
     public void MoveTiles()
     {
         // Swipe Up
@@ -286,12 +314,21 @@ public class GameTileBase : MonoBehaviour
             MoveTilesAction(-1, 0, SwipeDirection.Left);
         }
 
+        // Other tile exist?
         if (!otherTile)
         {
             gameBoard.currentPlayerState = PlayerState.Active;
         }
     }
 
+    /*
+     * Sets the move tile information
+     * 
+     * @param deltaCol - column increment 
+     * @param deltaRow - row increment 
+     * @param swipeDirection
+     * 
+     */
     private void MoveTilesAction(int deltaCol, int deltaRow, SwipeDirection swipeDirection)
     {
         int newCol = currentCol + deltaCol;
@@ -316,19 +353,29 @@ public class GameTileBase : MonoBehaviour
         }
     }
 
+    /*
+     * Starts the matched effect coroutine
+     */ 
     public virtual void PlayMatchedEffect(float waitTime)
     {
-
         StartCoroutine(DestructionEffect_Cor(waitTime));
     }
 
+    /*
+     * Tile destruction effect
+     */ 
     private IEnumerator DestructionEffect_Cor(float waitTime)
     {
         hintManager.DestroyHints();
+
+        // Drops alpha
         tileImage.color = new Color(0f, 0f, 0f, .3f);
         arrowMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
         gliderMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
 
+        /*
+         * Change score
+         */ 
         if (scoreManager.gameMode == GameMode.Collection && tileType != TileType.Avatar)
         {
             scoreManager.AddToScore(-1);
@@ -341,79 +388,41 @@ public class GameTileBase : MonoBehaviour
         yield return new WaitForSeconds(waitTime);
 
         Destroy(gameObject);
-        
+
     }
 
-    public Sprite LoadTileSprite(string tile)
+    /*
+     * Start Check move corountine
+     */ 
+    public void CorountineTileTrigger()
     {
-        Sprite tempSprite = Resources.Load<Sprite>("Tiles/" + tile);
-
-        return tempSprite;
-    }
-
-    public bool GetHasMatched()
-    {
-        return hasMatched;
-    }
-
-    public void SetHasMatched(bool hasMatched)
-    {
-        this.hasMatched = hasMatched;
-    }
-
-    public void SetGameTileType(GameTileType gameTileType)
-    {
-        this.gameTileType = gameTileType;
-
-        if (tileType == TileType.Avatar)
-        {
-            tileImage.sprite = LoadTileSprite(Utilities.AvatarIcon);
-        } else
-        {
-        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
-        }
-    }
-
-
-    public GameTileType GetGameTileType()
-    {
-        return gameTileType;
-    }
-
-    public TileType GetTileType()
-    {
-        return tileType;
-    }
-    public void SetTileType(TileType tileType)
-    {
-        this.tileType = tileType;
-
-        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
+        StartCoroutine(CheckMoveMade_Cor());
 
     }
 
-    public GameObject GetOtherTile()
-    {
-        return otherTile;
-    }
-
+    /*
+     * Checks the move made
+     */ 
     private IEnumerator CheckMoveMade_Cor()
     {
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+
         // Handle Avatar Tile Move
-        if(tileType == TileType.Avatar)
+        if (tileType == TileType.Avatar)
         {
             matchesManager.MatchAvatarTile(otherTile);
             hasMatched = true;
-        } else if (otherTile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
+        }
+        else if (otherTile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
         {
             matchesManager.MatchAvatarTile(gameObject);
             otherTile.GetComponent<GameTileBase>().SetHasMatched(true);
         }
 
-        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+        // Handle other tile types
         if (otherTile)
         {
-
+            // Changes tile location 
             if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
             {
                 otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
@@ -427,16 +436,20 @@ public class GameTileBase : MonoBehaviour
             }
             else
             {
+                // Changes moves made/left
                 if (scoreManager)
                 {
-                    if(Utilities.GameMode == GameMode.Collection)
+                    if (Utilities.GameMode == GameMode.Collection)
                     {
                         scoreManager.moves--;
+                    } else if(Utilities.GameMode == GameMode.Deadlocked)
+                    {
+                        scoreManager.moves++;
                     }
                 }
 
                 gameBoard.DestroyMatches();
-                
+
             }
 
             swipeDirection = SwipeDirection.None;
@@ -444,241 +457,79 @@ public class GameTileBase : MonoBehaviour
         }
     }
 
-    public void CorountineTileTrigger()
+    /*
+     * Load tile sprite asset
+     * 
+     * @return sprite
+     */
+    public Sprite LoadTileSprite(string tile)
     {
-        StartCoroutine(CheckMoveMade_Cor());
+        Sprite tempSprite = Resources.Load<Sprite>("Tiles/" + tile);
+
+        return tempSprite;
+    }
+
+    /*
+     * Getter for hasMatched
+     */ 
+    public bool GetHasMatched()
+    {
+        return hasMatched;
+    }
+
+    /*
+     * Setter for hasMatched
+     */ 
+    public void SetHasMatched(bool hasMatched)
+    {
+        this.hasMatched = hasMatched;
+    }
+
+    /*
+     * Getter for gameTileType
+     */ 
+    public GameTileType GetGameTileType()
+    {
+        return gameTileType;
+    }
+
+    /*
+     * Setter for gameTileType
+     */ 
+    public void SetGameTileType(GameTileType gameTileType)
+    {
+        this.gameTileType = gameTileType;
+
+        if (tileType == TileType.Avatar)
+        {
+            tileImage.sprite = LoadTileSprite(Utilities.AvatarIcon);
+        }
+        else
+        {
+            tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
+        }
+    }
+
+    /*
+     * Getter for tileType
+     */
+    public TileType GetTileType()
+    {
+        return tileType;
+    }
+    public void SetTileType(TileType tileType)
+    {
+        this.tileType = tileType;
+
+        tileImage.sprite = LoadTileSprite(Utilities.FindTileType(tileType, gameTileType));
 
     }
 
-    private IEnumerator LerpTile()
+    /*
+     * Getter for otherTile
+     */
+    public GameObject GetOtherTile()
     {
-        targetPosition.x = currentCol - 3.49f;
-        targetPosition.y = currentRow - 7.04f;
-
-        float animationTime = 0;
-
-        // The time you set on the animation graph
-        float animationEnd = animationGraph.keys[animationGraph.length - 1].time;
-
-        Vector3 currentPosition = gameObject.transform.position;
-
-        while (animationTime <= animationEnd)
-        {
-            float lerpFactor = animationGraph.Evaluate(animationTime);
-
-
-            gameObject.transform.position = Vector3.Lerp(currentPosition, targetPosition, lerpFactor);
-
-
-            animationTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
-        }
+        return otherTile;
     }
 }
-
-
-
-
-
-
-
-
-
-
-/*
- 
-    
-    public void FindMatches()
-    {
-        // Horizontal matches
-        if (currentCol > 0 && currentCol < gameBoard.width - 1)
-        {
-            GameObject LeftTile = gameBoard.allGameTiles[currentCol - 1, currentRow];
-            GameObject RightTile = gameBoard.allGameTiles[currentCol + 1, currentRow];
-
-            // Nullptr check
-            if (LeftTile && RightTile)
-            {
-                if (tileType == LeftTile.GetComponent<GameTileBase>().GetGameTileType() &&
-                    tileType == RightTile.GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    
-                        hasMatched = true;
-                        LeftTile.GetComponent<GameTileBase>().SetHasMatched(true);
-                        RightTile.GetComponent<GameTileBase>().SetHasMatched(true);
-
-                        LeftTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                        RightTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-
-                    }
-                }
-            }
-
-        // Vertical matches
-        if (currentRow > 0 && currentRow < gameBoard.height - 1)
-        {
-            GameObject BottomTile = gameBoard.allGameTiles[currentCol, currentRow - 1];
-            GameObject TopTile = gameBoard.allGameTiles[currentCol, currentRow + 1];
-
-            // Nullptr check
-            if (BottomTile && TopTile)
-            {
-                if (tileType == BottomTile.GetComponent<GameTileBase>().GetGameTileType() &&
-                    tileType == TopTile.GetComponent<GameTileBase>().GetGameTileType())
-                {
-
-                        hasMatched = true;
-                        BottomTile.GetComponent<GameTileBase>().SetHasMatched(true);
-                        TopTile.GetComponent<GameTileBase>().SetHasMatched(true);
-
-                        BottomTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                        TopTile.GetComponent<GameTileBase>().matchedParent = gameObject;
-                    }
-            }
-        }
-
-    }
-
-
-
-        public void FindMatchesWithSets()
-    {
-        HashSet<GameObject> TempHorizontalSet = new HashSet<GameObject>();
-        HashSet<GameObject> TempVerticalSet = new HashSet<GameObject>();
-
-        ValidMatches(currentCol, currentRow, TempHorizontalSet, TempVerticalSet);
-
-    }
-
-    public void ValidMatches(int col, int row, HashSet<GameObject> TempHorizontalSet, HashSet<GameObject> TempVerticalSet)
-    {
-        GameTileType testType = tileType;
-
-        int tempCol = col;
-        int tempRow = row;
-        
-        // Horizontal check
-        if (currentCol > 0 && currentCol < gameBoard.width - 1)
-        {
-
-            // Left Tiles Check
-            while (tempCol >= 0)
-            {
-                if (!gameBoard.allGameTiles[tempCol, tempRow])
-                {
-                    break;
-                }
-
-                if (testType == gameBoard.allGameTiles[tempCol, tempRow].GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    TempHorizontalSet.Add(gameBoard.allGameTiles[tempCol, tempRow]);
-                    tempCol--;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            //Right tiles check
-            tempCol = col;
-            tempRow = row;
-
-            while (tempCol < gameBoard.width)
-            {
-                if(!gameBoard.allGameTiles[tempCol, tempRow])
-                {
-                    break;
-                }
-
-                if (testType == gameBoard.allGameTiles[tempCol, tempRow].GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    TempHorizontalSet.Add(gameBoard.allGameTiles[tempCol, tempRow]);
-                    tempCol++;
-                }
-                else
-                {
-
-                    break;
-                }
-            }
-        }
-
-        // Vertical check
-        if (currentRow > 0 && currentRow < gameBoard.height - 1)
-        {
-            // Down tiles check
-            tempCol = col;
-            tempRow = row;
-
-            while (tempRow >= 0)
-            {
-                if (!gameBoard.allGameTiles[tempCol, tempRow])
-                {
-                    break;
-                }
-
-                if (testType == gameBoard.allGameTiles[tempCol, tempRow].GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    TempVerticalSet.Add(gameBoard.allGameTiles[tempCol, tempCol]);
-                    tempRow--;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            // Up tiles check
-            tempCol = col;
-            tempRow = row;
-
-            while (tempRow < gameBoard.height)
-            {
-                if (!gameBoard.allGameTiles[tempCol, tempRow])
-                {
-                    break;
-                }
-
-                if (testType == gameBoard.allGameTiles[tempCol, tempRow].GetComponent<GameTileBase>().GetGameTileType())
-                {
-                    TempVerticalSet.Add(gameBoard.allGameTiles[tempCol, tempRow]);
-                    tempRow++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        string tilesMatched = gameObject + ": ( Type: " + testType + " )" + " HSet: ";
-
-        // Set horizontal matches to true
-        if(TempHorizontalSet.Count >= 3)
-        {
-            foreach(GameObject tempObject in TempHorizontalSet)
-            {
-                tilesMatched += "{ " + tempObject + " : Type: " + tempObject.GetComponent<GameTileBase>().GetGameTileType() + " } "; 
-
-                tempObject.GetComponent<GameTileBase>().SetHasMatched(true);
-            }
-        }
-
-        tilesMatched += " VSet: ";
-
-        // Set vertical matches to true
-        if (TempVerticalSet.Count >= 3)
-        {
-            foreach (GameObject tempObject in TempVerticalSet)
-            {
-                tilesMatched += "{ " + tempObject + " : Type: " + tempObject.GetComponent<GameTileBase>().GetGameTileType() + " } ";
-
-                tempObject.GetComponent<GameTileBase>().SetHasMatched(true);
-            }
-        }
-
-        print(tilesMatched);
-    }
-     
-     */

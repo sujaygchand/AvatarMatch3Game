@@ -42,7 +42,9 @@ public class ScoreManager : MonoBehaviour
         SetupScoreManager();
     }
 
-    // Update is called once per frame
+    /*
+     *  Checks if game is over and updates dynamic text
+     */ 
     void Update()
     {
         if (!isGameOver)
@@ -54,11 +56,16 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /*
+     * Setup the board depending on game mode
+     */ 
     private void SetupScoreManager()
     {
+        // Resets 
         ResetScore();
         ResetTime();
 
+        // Set text
         switch (gameMode)
         {
             case GameMode.Collection:
@@ -73,12 +80,18 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /*
+     * Sets up text
+     */ 
     private void GameModeSetup(string scoreInfoText, string movesOrTimerInfoText)
     {
         this.scoreInfoText.text = scoreInfoText;
         this.movesOrTimerInfoText.text = movesOrTimerInfoText;
     }
 
+    /*
+     * Reset score
+     */ 
     public void ResetScore()
     {
         if(gameMode == GameMode.TimeAttack)
@@ -91,6 +104,9 @@ public class ScoreManager : MonoBehaviour
 
     }
 
+    /*
+     * Reset time
+     */ 
     public void ResetTime()
     {
         if(gameMode == GameMode.TimeAttack)
@@ -99,6 +115,9 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /*
+     * Changes score
+     */ 
     public void AddToScore(int deltaScore)
     {
         if(tiles + deltaScore <= 0 )
@@ -110,8 +129,12 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /*
+     * Checks if game over
+     */ 
     private void GameOverCheck()
     {
+        //Time attack
         if (gameMode == GameMode.TimeAttack)
         {
             if (gameBoard.currentPlayerState == PlayerState.Active && currentTime > 0)
@@ -129,10 +152,13 @@ public class ScoreManager : MonoBehaviour
             }
 
 
-        } else if(gameMode == GameMode.Collection)
+        }
+        // Collection
+        else if(gameMode == GameMode.Collection)
         {
             movesOrTimerText.text = "" + moves;
 
+                // Win
                 if (tiles <= 0)
                 {
                     print("All tiles collected");
@@ -140,6 +166,7 @@ public class ScoreManager : MonoBehaviour
                     isGameOver = true;
             }
 
+            // Loss
             else if (moves <= 0 && tiles > 0)
             {
                 print("All tiles collected");
@@ -149,6 +176,9 @@ public class ScoreManager : MonoBehaviour
             }
         }
 
+    /*
+     * Change move counter
+     */ 
     public void AddToMoves(int deltaMove)
     {
         if(gameMode == GameMode.Collection)

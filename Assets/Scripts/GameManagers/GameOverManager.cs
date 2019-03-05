@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Game Over manager
+ */
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +12,7 @@ using Assets.Scripts.Helpers;
 
 public class GameOverManager : MonoBehaviour
 {
+    // UI GameObjects
     [SerializeField] private Text s_GameOverText;
     [SerializeField] private GameObject s_GameOver;
 
@@ -15,6 +22,7 @@ public class GameOverManager : MonoBehaviour
         s_GameOver.SetActive(false);
     }
 
+    // Renders game over screen
     public void RenderGameOverScreen(bool hasWon)
     {
         Utilities.IsGamePaused = true;

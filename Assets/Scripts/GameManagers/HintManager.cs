@@ -1,15 +1,22 @@
-﻿using System.Collections;
+﻿/**
+ * 
+ * Author: Sujay Chand
+ * 
+ *  Hint manager
+ */
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class HintManager : MonoBehaviour
 {
-    public HashSet<GameObject> currentHints = new HashSet<GameObject>();
+    public HashSet<GameObject> currentHints = new HashSet<GameObject>();                // Set for hints
     private GameBoard gameBoard;
     private Deadlock deadlock;
-    [SerializeField] float s_hintDelayMax;
+    [SerializeField] float s_hintDelayMax;                              // Max Hint delay
     public float hintDelay;
 
+    // Hint prefab particle
     [SerializeField] GameObject s_HintParticle;
 
     // Start is called before the first frame update
@@ -18,9 +25,11 @@ public class HintManager : MonoBehaviour
         gameBoard = FindObjectOfType<GameBoard>();
         deadlock = FindObjectOfType<Deadlock>();
 
+        // Set delay  
         hintDelay = s_hintDelayMax;
     }
 
+    // Updates time for hint counter
     private void Update()
     {
         if (gameBoard.currentPlayerState == PlayerState.Active)
@@ -35,11 +44,17 @@ public class HintManager : MonoBehaviour
         }
     }
 
+    /*
+     * Reset hint, countdown
+     */ 
     private void ResetHintTimer()
     {
         hintDelay = s_hintDelayMax;
     }
 
+    /*
+     *  Spawns hint on possible combo
+     */ 
     private void SetAndSpawnHints()
     {
         foreach(GameObject hint in deadlock.possibleCombo)
@@ -52,7 +67,9 @@ public class HintManager : MonoBehaviour
         }
     }
 
-
+    /*
+     * Destroys hint instance
+     */ 
     public void DestroyHints()
     {
         if(currentHints.Count > 0)
