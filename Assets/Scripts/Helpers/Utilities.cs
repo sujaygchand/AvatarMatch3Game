@@ -19,6 +19,7 @@ namespace Assets.Scripts.Helpers
         public static bool IsSoundActive = true;
         public static bool IsMusicActive = true;
         public static bool IsGamePaused = false;
+        public static bool GameLoadedOnce = false;
         
         // String helpers
         public static string Resources = "Resources";

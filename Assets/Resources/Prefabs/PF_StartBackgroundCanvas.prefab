@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 20912995100889372}
   - component: {fileID: 20912995100889373}
   m_Layer: 5
-  m_Name: BackgroundCanvas
+  m_Name: PF_StartBackgroundCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

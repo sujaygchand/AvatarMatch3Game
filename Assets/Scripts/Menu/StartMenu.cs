@@ -18,6 +18,7 @@ public class StartMenu : MonoBehaviour
 
     public AudioClip pressedSound;
     private AudioSource audioSource;
+    private FadeController fadeController;
 
     // UI canvases
     [SerializeField] GameObject s_MainMenu;
@@ -36,14 +37,19 @@ public class StartMenu : MonoBehaviour
         // 2560 1920 1280 640 (- 640)
         // 1440 1080 720 360 (- 360)
 
-        if(ScreenWidth == Screen.width || ScreenHeight == Screen.height)
+        if (!Utilities.GameLoadedOnce)
         {
-            ScreenHeight = Screen.width - (640 * 2);
-            ScreenWidth = Screen.height - (360 * 2);
-            Screen.SetResolution(ScreenWidth, ScreenHeight, true);
+            Utilities.GameLoadedOnce = true;
+
+            if (ScreenWidth == Screen.width || ScreenHeight == Screen.height)
+            {
+                ScreenHeight = Screen.width - (640 * 2);
+                ScreenWidth = Screen.height - (360 * 2);
+                Screen.SetResolution(ScreenWidth, ScreenHeight, true);
+            }
         }
 
-
+        fadeController = FindObjectOfType<FadeController>();
 
         Utilities.IsGamePaused = false;
         audioSource = GetComponent<AudioSource>();
@@ -130,8 +136,10 @@ public class StartMenu : MonoBehaviour
         PlaySound();
         Utilities.GameMode = GameMode.Collection;
 
-        SceneManager.LoadScene(Utilities.GameLevel);
-        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
+        fadeController.SceneTransition(Utilities.GameLevel, Utilities.StartMenu);
+
+        //SceneManager.LoadScene(Utilities.GameLevel);
+        //SceneManager.UnloadSceneAsync(Utilities.StartMenu);
     }
 
     /*
@@ -142,8 +150,9 @@ public class StartMenu : MonoBehaviour
         PlaySound();
         Utilities.GameMode = GameMode.TimeAttack;
 
-        SceneManager.LoadScene(Utilities.GameLevel);
-        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
+        fadeController.SceneTransition(Utilities.GameLevel, Utilities.StartMenu);
+        //SceneManager.LoadScene(Utilities.GameLevel);
+        //SceneManager.UnloadSceneAsync(Utilities.StartMenu);
     }
 
     public void DeadlockedPressed()
@@ -151,13 +160,14 @@ public class StartMenu : MonoBehaviour
         PlaySound();
         Utilities.GameMode = GameMode.Deadlocked;
 
-        SceneManager.LoadScene(Utilities.DeadlockMap);
-        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
+        fadeController.SceneTransition(Utilities.DeadlockMap, Utilities.StartMenu);
+        //SceneManager.LoadScene(Utilities.DeadlockMap);
+        //SceneManager.UnloadSceneAsync(Utilities.StartMenu);
     }
 
     /*
- * Restarts the scene
- */
+     * Restarts the scene
+     */
     public void RestartLevel()
     {
         Utilities.IsGamePaused = false;

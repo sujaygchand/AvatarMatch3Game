@@ -23,6 +23,7 @@ public class GameMenu : MonoBehaviour
     [SerializeField] GameObject s_QuitMenu;
     [SerializeField] GameObject s_MusicButton;
     [SerializeField] GameObject s_SoundButton;
+    private FadeController fadeController;
 
     private AudioSource audioSource;
     private GameBoard gameBoard;
@@ -36,6 +37,7 @@ public class GameMenu : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         gameBoard = FindObjectOfType<GameBoard>();
         gameOverManager = FindObjectOfType<GameOverManager>();
+        fadeController = FindObjectOfType<FadeController>();
 
         audioSource.playOnAwake = false;
         audioSource.clip = pressedSound;
@@ -80,17 +82,14 @@ public class GameMenu : MonoBehaviour
      */
     public void GameMapMainMenu()
     {
-
-        //PlaySound();
-        //Application.Quit();
-
-       
         Utilities.IsGamePaused = false;
         PlaySound();
+        CloseQuitMenu();
 
-        // Experiening crashes with the lastest version of Unity
-        SceneManager.LoadSceneAsync(Utilities.StartMenu);
-        SceneManager.UnloadSceneAsync(Utilities.GameLevel);
+        // Loads new scene
+        fadeController.SceneTransition(Utilities.StartMenu, Utilities.GameLevel);
+        //SceneManager.LoadScene(Utilities.StartMenu);
+        //SceneManager.UnloadSceneAsync(Utilities.GameLevel);
     }
 
     /*
@@ -100,16 +99,16 @@ public class GameMenu : MonoBehaviour
  */
     public void DeadlockMainMenu()
     {
-        //PlaySound();
-        //Application.Quit();
 
         // Experiening crashes with the lastest version of Unity
         Utilities.IsGamePaused = false;
         PlaySound();
+        CloseQuitMenu();
 
-        // Experiening crashes with the lastest version of Unity
-        SceneManager.LoadScene(Utilities.StartMenu);
-        SceneManager.UnloadSceneAsync(Utilities.DeadlockMap);
+        // Loads new scene
+        fadeController.SceneTransition(Utilities.StartMenu, Utilities.DeadlockMap);
+        //SceneManager.LoadScene(Utilities.StartMenu);
+        //SceneManager.UnloadSceneAsync(Utilities.DeadlockMap);
     }
 
     /*
@@ -217,6 +216,8 @@ public class GameMenu : MonoBehaviour
      */ 
     public void OpenQuitMenu()
     {
+        PlaySound();
+
         s_PauseMenu.SetActive(false);
 
         s_QuitMenu.SetActive(true);
@@ -227,6 +228,7 @@ public class GameMenu : MonoBehaviour
     */
     public void CloseQuitMenu()
     {
+        PlaySound();
         s_QuitMenu.SetActive(false);
 
         TogglePause();

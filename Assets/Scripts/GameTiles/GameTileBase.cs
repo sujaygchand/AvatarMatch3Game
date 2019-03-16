@@ -170,6 +170,7 @@ public class GameTileBase : MonoBehaviour
      */
     private void OnMouseOver()
     {
+        /*
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             GenerateCharTile(true);
@@ -194,6 +195,7 @@ public class GameTileBase : MonoBehaviour
         {
             SetGameTileType(GameTileType.Air);
         }
+        */
     }
 
     /*
