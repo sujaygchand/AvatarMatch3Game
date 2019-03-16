@@ -59,6 +59,7 @@ public class GameTileBase : MonoBehaviour
     public GameObject matchedParent;
     public SwipeDirection swipeDirection = SwipeDirection.None;
     private bool doOnce = false;
+    private bool doMatchesCheck = true;
 
     // On Awake
     private void Awake()
@@ -108,9 +109,14 @@ public class GameTileBase : MonoBehaviour
                 {
                     // Sets new tile reference
                     gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
-                    matchesManager.CheckForMatches();
                 }
 
+                if (doMatchesCheck)
+                {
+                    doMatchesCheck = false;
+                    //print(gameObject);
+                    matchesManager.CheckForMatches();
+                }
             }
             else
             {
@@ -120,6 +126,7 @@ public class GameTileBase : MonoBehaviour
                 if (gameBoard.allGameTiles[currentCol, currentRow])
                 {
                     gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+                    doMatchesCheck = true;
                 }
             }
         }
@@ -182,11 +189,79 @@ public class GameTileBase : MonoBehaviour
         {
             GenerateAvatarTile();
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            SetGameTileType(GameTileType.Air);
+        }
+    }
+
+    /*
+ * Start Check move corountine
+ */
+    public void CorountineTileTrigger()
+    {
+        StartCoroutine(CheckMoveMade_Cor());
+
+    }
+
+    /*
+     * Checks the move made
+     */
+    private IEnumerator CheckMoveMade_Cor()
+    {
+        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+
+        // Handle Avatar Tile Move
+        if (tileType == TileType.Avatar)
+        {
+            matchesManager.MatchAvatarTile(otherTile);
+            hasMatched = true;
+        }
+        else if (otherTile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
+        {
+            matchesManager.MatchAvatarTile(gameObject);
+            otherTile.GetComponent<GameTileBase>().SetHasMatched(true);
+        }
+
+        // Handle other tile types
+        if (otherTile)
+        {
+            // Changes tile location
+            // When no match is found
+            if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
+            {
+                otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
+                otherTile.GetComponent<GameTileBase>().currentRow = currentRow;
+                currentCol = previousCol;
+                currentRow = previousRow;
+
+                yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
+                gameBoard.currentTile = null;
+                gameBoard.currentPlayerState = PlayerState.Active;
+            }
+            // When match is found
+            else
+            {
+                // Changes moves made/left
+                if (scoreManager)
+                {
+                    scoreManager.ChangeMovesCounter();
+                }
+
+                gameBoard.MatchedCoroutine();
+
+            }
+
+            swipeDirection = SwipeDirection.None;
+            swipeAngle = 0;
+            otherTile = null;
+        }
     }
 
     /*
      * Calculate angle for the swipe angle and moves tiles
-     */ 
+     */
     private void CalculateAngle()
     {
         // Check against accidental swipes
@@ -219,6 +294,10 @@ public class GameTileBase : MonoBehaviour
         this.isRowChar = isRowChar;
         isColChar = !isRowChar;
 
+        // Fail safe Reset
+        gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+        // Spawn destroy particle
+        gameBoard.DestroyParticle(currentCol, currentRow);
 
         if (gliderMask.GetComponent<SpriteRenderer>().enabled)
         {
@@ -241,6 +320,10 @@ public class GameTileBase : MonoBehaviour
             arrowMask.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
         }
 
+        gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+        
+        //Change score         
+        scoreManager.AddToScore(1);
     }
 
     /*
@@ -256,6 +339,11 @@ public class GameTileBase : MonoBehaviour
         isRowChar = false;
         isColChar = false;
 
+        // Fail safe Reset
+        gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+        // Spawn destroy particle
+        gameBoard.DestroyParticle(currentCol, currentRow);
+
         tileType = TileType.Glider;
 
         if (arrowMask.GetComponent<SpriteRenderer>().enabled)
@@ -264,6 +352,9 @@ public class GameTileBase : MonoBehaviour
         }
 
         gliderMask.GetComponent<SpriteRenderer>().enabled = true;
+
+        //Change score         
+        scoreManager.AddToScore(1);
     }
 
     /*
@@ -274,6 +365,11 @@ public class GameTileBase : MonoBehaviour
         isRowChar = false;
         isRowChar = false;
 
+        // Fail safe Reset
+        gameBoard.allGameTiles[currentCol, currentRow] = gameObject;
+        // Spawn destroy particle
+        gameBoard.DestroyParticle(currentCol, currentRow);
+
         if (arrowMask.GetComponent<SpriteRenderer>().enabled)
         {
             arrowMask.GetComponent<SpriteRenderer>().enabled = false;
@@ -283,6 +379,9 @@ public class GameTileBase : MonoBehaviour
         tileType = TileType.Avatar;
 
         SetGameTileType(gameTileType);
+
+        //Change score         
+        scoreManager.AddToScore(1);
     }
 
     /*
@@ -366,6 +465,7 @@ public class GameTileBase : MonoBehaviour
      */ 
     private IEnumerator DestructionEffect_Cor(float waitTime)
     {
+        
         hintManager.DestroyHints();
 
         // Drops alpha
@@ -373,88 +473,16 @@ public class GameTileBase : MonoBehaviour
         arrowMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
         gliderMask.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, .3f);
 
-        /*
-         * Change score
-         */ 
-        if (scoreManager.gameMode == GameMode.Collection && tileType != TileType.Avatar)
-        {
-            scoreManager.AddToScore(-1);
-        }
-        else
-        {
-            scoreManager.AddToScore(+1);
-        }
+         //Change score         
+          scoreManager.AddToScore(1);
 
-        yield return new WaitForSeconds(waitTime);
 
+        matchesManager.PlayMatchSound();
+
+        yield return null;
+        gameBoard.allGameTiles[currentCol, currentRow] = null;
         Destroy(gameObject);
 
-    }
-
-    /*
-     * Start Check move corountine
-     */ 
-    public void CorountineTileTrigger()
-    {
-        StartCoroutine(CheckMoveMade_Cor());
-
-    }
-
-    /*
-     * Checks the move made
-     */ 
-    private IEnumerator CheckMoveMade_Cor()
-    {
-        yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
-
-        // Handle Avatar Tile Move
-        if (tileType == TileType.Avatar)
-        {
-            matchesManager.MatchAvatarTile(otherTile);
-            hasMatched = true;
-        }
-        else if (otherTile.GetComponent<GameTileBase>().GetTileType() == TileType.Avatar)
-        {
-            matchesManager.MatchAvatarTile(gameObject);
-            otherTile.GetComponent<GameTileBase>().SetHasMatched(true);
-        }
-
-        // Handle other tile types
-        if (otherTile)
-        {
-            // Changes tile location 
-            if (!hasMatched && !otherTile.GetComponent<GameTileBase>().hasMatched)
-            {
-                otherTile.GetComponent<GameTileBase>().currentCol = currentCol;
-                otherTile.GetComponent<GameTileBase>().currentRow = currentRow;
-                currentCol = previousCol;
-                currentRow = previousRow;
-
-                yield return new WaitForSeconds(gameBoard.GetDestructionWaitTime());
-                gameBoard.currentTile = null;
-                gameBoard.currentPlayerState = PlayerState.Active;
-            }
-            else
-            {
-                // Changes moves made/left
-                if (scoreManager)
-                {
-                    if (Utilities.GameMode == GameMode.Collection)
-                    {
-                        scoreManager.moves--;
-                    } else if(Utilities.GameMode == GameMode.Deadlocked)
-                    {
-                        scoreManager.moves++;
-                    }
-                }
-
-                gameBoard.DestroyMatches();
-
-            }
-
-            swipeDirection = SwipeDirection.None;
-            otherTile = null;
-        }
     }
 
     /*

@@ -17,7 +17,7 @@ public class ScoreManager : MonoBehaviour
     private GameOverManager gameOverManager;
     public int tilesToCollect = 50;
     private int tiles;
-    public int moves = 14;
+    [SerializeField] private int moves = 14;
     public int timeLimt = 60;
     private float currentTime;
     private int displayTime;
@@ -50,7 +50,6 @@ public class ScoreManager : MonoBehaviour
         if (!isGameOver)
         {
             scoreText.text = "" + tiles;
-
 
             GameOverCheck();
         }
@@ -94,12 +93,12 @@ public class ScoreManager : MonoBehaviour
      */ 
     public void ResetScore()
     {
-        if(gameMode == GameMode.TimeAttack)
-        {
-            tiles = 0;
-        } else
+        if(gameMode == GameMode.Collection)
         {
             tiles = tilesToCollect;
+        } else 
+        {
+            tiles = 0;
         }
 
     }
@@ -120,6 +119,11 @@ public class ScoreManager : MonoBehaviour
      */ 
     public void AddToScore(int deltaScore)
     {
+        if(gameMode == GameMode.Collection)
+        {
+            deltaScore *= -1;
+        }
+
         if(tiles + deltaScore <= 0 )
         {
             tiles = 0;
@@ -174,20 +178,26 @@ public class ScoreManager : MonoBehaviour
                 isGameOver = true;
             }
             }
+
+        // Deadlocked game mode
+        else
+        {
+            movesOrTimerText.text = "" + moves;
+        } 
         }
 
     /*
      * Change move counter
      */ 
-    public void AddToMoves(int deltaMove)
+    public void ChangeMovesCounter()
     {
         if(gameMode == GameMode.Collection)
         {
-            moves -= deltaMove;
+            moves--;
         }
         else if(gameMode == GameMode.Deadlocked)
         {
-            moves += deltaMove;
+            moves++;
         }
     }
 }

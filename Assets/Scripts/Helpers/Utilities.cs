@@ -15,7 +15,7 @@ namespace Assets.Scripts.Helpers
     public static class Utilities
     {
         // Used between scenes and a large amount of objects
-        public static GameMode GameMode = GameMode.Collection;
+        public static GameMode GameMode = GameMode.TimeAttack;
         public static bool IsSoundActive = true;
         public static bool IsMusicActive = true;
         public static bool IsGamePaused = false;
@@ -36,7 +36,8 @@ namespace Assets.Scripts.Helpers
         public static string Moves = "Moves";
         public static string Time = "Time";
         public static string GameLevel = "SC_Game";
-        public static string StartMenu = "SC_StartMenu";
+        public static string StartMenu = "SC_TitleScreen";
+        public static string DeadlockMap = "SC_Deadlock";
         public static string Music = "Music";
 
         // Helps makes string path to tile image

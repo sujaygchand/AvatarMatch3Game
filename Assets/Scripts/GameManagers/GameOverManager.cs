@@ -16,9 +16,12 @@ public class GameOverManager : MonoBehaviour
     [SerializeField] private Text s_GameOverText;
     [SerializeField] private GameObject s_GameOver;
 
+    public bool isGameOver;
+
     // Start is called before the first frame update
     void Start()
     {
+        isGameOver = false;
         s_GameOver.SetActive(false);
     }
 
@@ -27,6 +30,7 @@ public class GameOverManager : MonoBehaviour
     {
         Utilities.IsGamePaused = true;
         s_GameOver.SetActive(true);
+        isGameOver = true;
 
         if (Utilities.GameMode == GameMode.Collection)
         {

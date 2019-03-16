@@ -192,40 +192,18 @@ MonoBehaviour:
   currentRow: 0
   gameTileType: 0
   tileType: 0
-  animationGraph:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   isRowChar: 0
   isColChar: 0
   isAvatarTile: 0
   arrowMask: {fileID: 5876277898435659896}
   gliderMask: {fileID: 734004623403291274}
+  swipeAngle: 0
+  swipeThreshold: 0.9
   tileImage: {fileID: 0}
   gameBoard: {fileID: 0}
   gameGridObject: {fileID: 0}
-  swipeAngle: 0
-  swipeThreshold: 0.9
+  s_DestroyParticle: {fileID: 6714914986444518597, guid: c6fbb9885a41b7a4eae9ddd2050fdeb3,
+    type: 3}
   hasMatched: 0
   additonalCheck: 0
   matchedParent: {fileID: 0}

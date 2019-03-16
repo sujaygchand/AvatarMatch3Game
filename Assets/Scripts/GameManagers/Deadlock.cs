@@ -37,7 +37,7 @@ public class Deadlock : MonoBehaviour
     /*
      * Shuffles the board
      */ 
-    private void ShuffleBoard()
+    public void ShuffleBoard()
     {
         // New collection to store tiles in
         List<GameObject> newTilesCollection = new List<GameObject>();
@@ -103,7 +103,7 @@ public class Deadlock : MonoBehaviour
      * 
      * @return a bool
      */ 
-    private bool IsGameDeadlocked()
+    public bool IsGameDeadlocked()
     {
     
       // Return false match if no match
@@ -274,9 +274,9 @@ public class Deadlock : MonoBehaviour
                 currentTile.GetGameTileType() == otherTile2.GetGameTileType())
             {
                 //Debug
-                print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
-                print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
-                print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
+                //print(string.Format("[ {0} , {1}, {2} ]", currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject));
+                //print(string.Format("Col i = {0}, Row i = {1}", colIncrement, rowIncrement));
+                //print(string.Format("TempCol = {0}, TempRow = {1}, TempCol2 = {2}, TempRow2 = {3}", tempCol1, tempRow1, tempCol2, tempRow2));
 
                     // Add match to combo
                     GameObject[] combo = { currentTile.gameObject, otherTile1.gameObject, otherTile2.gameObject };

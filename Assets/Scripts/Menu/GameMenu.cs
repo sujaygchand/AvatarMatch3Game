@@ -26,20 +26,22 @@ public class GameMenu : MonoBehaviour
 
     private AudioSource audioSource;
     private GameBoard gameBoard;
+    private GameOverManager gameOverManager;
     private bool isGamePaused;
 
     // Start is called before the first frame update
     void Start()
     {
-
         Utilities.IsGamePaused = false;
         audioSource = GetComponent<AudioSource>();
         gameBoard = FindObjectOfType<GameBoard>();
+        gameOverManager = FindObjectOfType<GameOverManager>();
 
         audioSource.playOnAwake = false;
         audioSource.clip = pressedSound;
         isGamePaused = false;
         s_PauseMenu.SetActive(isGamePaused);
+        Time.timeScale = 1f;
         ToggleSound();
         CheckMuted();
 
@@ -72,13 +74,42 @@ public class GameMenu : MonoBehaviour
     }
 
     /*
+     *  // Experiening crashes with the lastest version of Unity
+     *  
      * Takes the player to the main menu
      */
-    public void MainMenu()
+    public void GameMapMainMenu()
     {
+
+        //PlaySound();
+        //Application.Quit();
+
+       
         Utilities.IsGamePaused = false;
         PlaySound();
+
+        // Experiening crashes with the lastest version of Unity
+        SceneManager.LoadSceneAsync(Utilities.StartMenu);
+        SceneManager.UnloadSceneAsync(Utilities.GameLevel);
+    }
+
+    /*
+     *  // Experiening crashes with the lastest version of Unity
+     *  
+ * Takes the player to the main menu
+ */
+    public void DeadlockMainMenu()
+    {
+        //PlaySound();
+        //Application.Quit();
+
+        // Experiening crashes with the lastest version of Unity
+        Utilities.IsGamePaused = false;
+        PlaySound();
+
+        // Experiening crashes with the lastest version of Unity
         SceneManager.LoadScene(Utilities.StartMenu);
+        SceneManager.UnloadSceneAsync(Utilities.DeadlockMap);
     }
 
     /*
@@ -86,21 +117,27 @@ public class GameMenu : MonoBehaviour
      */
     public void TogglePause()
     {
-        PlaySound();
-        isGamePaused = !isGamePaused;
-
-        Utilities.IsGamePaused = isGamePaused;
-
-        s_PauseMenu.SetActive(isGamePaused);
-
-        if (isGamePaused)
+        if (gameOverManager)
         {
+            if (gameOverManager.isGameOver == false && s_QuitMenu.activeSelf == false)
+            {
+                PlaySound();
+                isGamePaused = !isGamePaused;
 
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            Time.timeScale = 1f;
+                Utilities.IsGamePaused = isGamePaused;
+
+                s_PauseMenu.SetActive(isGamePaused);
+
+                if (isGamePaused)
+                {
+
+                    Time.timeScale = 0f;
+                }
+                else
+                {
+                    Time.timeScale = 1f;
+                }
+            }
         }
     }
 

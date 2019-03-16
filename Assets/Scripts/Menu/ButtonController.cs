@@ -2,39 +2,38 @@
  * 
  * Author: Sujay Chand
  * 
- *  Button sounds
+ *  Button text infomation
  */
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(AudioSource))]
-public class ButtonController : MonoBehaviour
+public class ButtonController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public AudioClip pressedSound;
-    private Button button;
-    private AudioSource audioSource;
+    public GameObject CorrespondingText;
 
-
-    // Start is called before the first frame update
-    void Start()
+    // On enable deactive text
+    private void OnEnable()
     {
-        button = GetComponent<Button>();
-        audioSource = GetComponent<AudioSource>();
-
-        audioSource.playOnAwake = false;
-        audioSource.clip = pressedSound;
-
-        //button.onClick.AddListener(() => PlaySound());
+        CorrespondingText.SetActive(false);
     }
 
-    private void PlaySound()
+    /*
+     * Render text
+     */
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        audioSource.PlayOneShot(pressedSound);
+        CorrespondingText.SetActive(true);
     }
 
-
-
+    /*
+     *  Deactive text
+     */
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        CorrespondingText.SetActive(false);
+    }
 }

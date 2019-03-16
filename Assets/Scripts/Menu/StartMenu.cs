@@ -13,6 +13,9 @@ using Assets.Scripts.Helpers;
 
 public class StartMenu : MonoBehaviour
 {
+    public static int ScreenWidth = Screen.width;
+    public static int ScreenHeight = Screen.height;
+
     public AudioClip pressedSound;
     private AudioSource audioSource;
 
@@ -21,9 +24,27 @@ public class StartMenu : MonoBehaviour
     [SerializeField] GameObject s_PlayMenu;
     [SerializeField] GameObject s_HelpMenu;
 
+    // Force game into a portrait view
+    private void Awake()
+    {
+
+    }
+
     // Start is called before the first frame update
     private void Start()
     {
+        // 2560 1920 1280 640 (- 640)
+        // 1440 1080 720 360 (- 360)
+
+        if(ScreenWidth == Screen.width || ScreenHeight == Screen.height)
+        {
+            ScreenHeight = Screen.width - (640 * 2);
+            ScreenWidth = Screen.height - (360 * 2);
+            Screen.SetResolution(ScreenWidth, ScreenHeight, true);
+        }
+
+
+
         Utilities.IsGamePaused = false;
         audioSource = GetComponent<AudioSource>();
 
@@ -34,12 +55,17 @@ public class StartMenu : MonoBehaviour
         s_PlayMenu.SetActive(false);
     }
 
+    private void Update()
+    {
+
+    }
+
     /*
     * Toggles sound effects on start
     */
     public void ToggleSound()
     {
-        audioSource.enabled = Utilities.IsSoundActive;
+        //audioSource.enabled = Utilities.IsSoundActive;
     }
 
     /*
@@ -103,7 +129,9 @@ public class StartMenu : MonoBehaviour
     {
         PlaySound();
         Utilities.GameMode = GameMode.Collection;
+
         SceneManager.LoadScene(Utilities.GameLevel);
+        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
     }
 
     /*
@@ -113,8 +141,28 @@ public class StartMenu : MonoBehaviour
     {
         PlaySound();
         Utilities.GameMode = GameMode.TimeAttack;
+
         SceneManager.LoadScene(Utilities.GameLevel);
+        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
     }
 
+    public void DeadlockedPressed()
+    {
+        PlaySound();
+        Utilities.GameMode = GameMode.Deadlocked;
+
+        SceneManager.LoadScene(Utilities.DeadlockMap);
+        SceneManager.UnloadSceneAsync(Utilities.StartMenu);
+    }
+
+    /*
+ * Restarts the scene
+ */
+    public void RestartLevel()
+    {
+        Utilities.IsGamePaused = false;
+        PlaySound();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 
 }
