@@ -37,15 +37,20 @@ public class StartMenu : MonoBehaviour
         // 2560 1920 1280 640 (- 640)
         // 1440 1080 720 360 (- 360)
 
+
         if (!Utilities.GameLoadedOnce)
         {
             Utilities.GameLoadedOnce = true;
-
-            if (ScreenWidth == Screen.width || ScreenHeight == Screen.height)
+            
+            // Only change dimension if on Desktop
+            if (SystemInfo.deviceType == DeviceType.Desktop)
             {
-                ScreenHeight = Screen.width - (640 * 2);
-                ScreenWidth = Screen.height - (360 * 2);
-                Screen.SetResolution(ScreenWidth, ScreenHeight, true);
+                if (ScreenWidth == Screen.width || ScreenHeight == Screen.height)
+                {
+                    ScreenHeight = Screen.width - (640 * 2);
+                    ScreenWidth = Screen.height - (360 * 2);
+                    Screen.SetResolution(ScreenWidth, ScreenHeight, true);
+                }
             }
         }
 
